@@ -1075,7 +1075,7 @@ function clrel_Callback(hObject, eventdata, handles)
 
 
 delete(handles.figure1);
-AnnalysisGUI_v02;
+DyeDist;
 
 
 % --------------------------------------------------------------------
