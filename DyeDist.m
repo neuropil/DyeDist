@@ -195,6 +195,10 @@ if isempty(handles.ImgNames)
     return
 end
 
+%%%%% ADD parseImageFiles FUNCTION to get names and numbers
+
+
+
 sectNumExt = cellfun(@(x) str2double(regexp(x,'\d*','match')),handles.ImgNames);
 
 [handles.SectionIndex,sortOrder] = sort(sectNumExt);

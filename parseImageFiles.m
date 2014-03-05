@@ -2,6 +2,10 @@ function [imageID] = parseImageFiles(imFileNames,chanNum)
 %PARSEIMAGEFILES Summary of this function goes here
 %   Detailed explanation goes here
 
+% Ignore mismatches; throw them out and throw out warning message 
+
+
+
 % Check if number of inputs are correct
 if nargin < 2 || nargin > 2
     error('Must input two arguments');
@@ -104,17 +108,30 @@ if chanNum == 1
     
     % Sort and save into struct for output
     [~,nisslOrder] = sort(cell2mat(nisslFnums));
-    [~,roiOrder] = sort(cell2mat(roiFnums));
+    [~,imageOrder] = sort(cell2mat(roiFnums));
     
-    imageID.Conditions.Nissl.Nums = nisslFnums(nisslOrder);
-    imageID.Conditions.Nissl.FNames = nisslFiles(nisslOrder);
-    imageID.Conditions.ROI.Nums = roiFnums(roiOrder);
-    imageID.Conditions.ROI.FNames = roiFiles(roiOrder);
-
-end
-
+    imageID.Nissl.Nums = nisslFnums(nisslOrder);
+    imageID.Nissl.FNames = nisslFiles(nisslOrder);
+    imageID.ROI.Nums = roiFnums(imageOrder);
+    imageID.ROI.FNames = roiFiles(imageOrder);
+  
 % If more than one channels
 % Look for number
+elseif chanNum > 1
+    
+    imFnums = cellfun(@(x) str2double(regexp(x,'[0-9]','match')), imFileNames);
+    
+    imFnums = num2cell(imFnums);
+    
+    % Sort and save into struct for output
+    [~,imageOrder] = sort(cell2mat(imFnums));
+    
+    imageID.Image.Nums = imFnums(imageOrder);
+    imageID.Image.FNames = imFileNames(imageOrder);
+    
+end
+
+
 
 
 
