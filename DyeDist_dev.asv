@@ -28,7 +28,7 @@ function varargout = DyeDist_dev(varargin)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % THINGS TO DO
-% ADD NEW DISTRIBUTION ANALYSIS by quadrant (3/6/2014)
+% ADD NEW DISTRIBUTION ANALYSIS
 % ADD ABILITY TO NAME SHEETS FOR DIFFERENT DATA SETS 
 % FINIALIZE EXPORT FEATURES
 
@@ -879,33 +879,26 @@ function expXl_Callback(hObject, eventdata, handles)
 handles.saveLoc = uigetdir('C:\');
 cd(handles.saveLoc)
 
-versionCheck = version('-release');
-getYear = str2double(versionCheck(1:end-1));
-if getYear < 2013
-    DS_toggle = 0;
-else
-    DS_toggle = 1;
-end
-
 % Get number of sheets
 numofSheets = numel(fieldnames(handles.AllDATA));
 
 % Get number of columns needed
-caseName = inputdlg('Save file ID','FILE name',[1 30],{'data'});
-saveName = strcat('AnnalysisOutput_',date,'_',char(caseName),'.xlsx');
+
 for nsi = 1:numofSheets
     
     tempCols = handles.ExportColnames{nsi};
-    tempSheet = handles.CaseNames{nsi};
+    tempSheet = handles.CaseNames{nsi}; 
     tempData = handles.AllDATA.(strcat('sheet',num2str(nsi)));
     
-    if DS_toggle
-        outData = cell2dataset(tempData,'VarNames',tempCols);
-    else
-        % Do something
-    end
+    outData = cell2dataset(tempData,'VarNames',tempCols);
     
-    export(outData,'XLSfile',saveName,'sheet',tempSheet)
+    caseName = inputdlg('Save file ID','FILE name',[1 30],{'data'});
+    
+    saveName = strcat('AnnalysisOutput_',date,'_',char(caseName),'.xlsx');
+    
+    export(DS,'XLSfile','Test.xlsx','sheet',1)
+    export(DS,'XLSfile','Test.xlsx','sheet',2)
+    
 end
 
 
