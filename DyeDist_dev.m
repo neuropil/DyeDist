@@ -882,40 +882,51 @@ function expXl_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+expquest = questdlg('Are you sure you want to EXPORT TO EXCEL?','EXCEL?',...
+    'Yes','No','Yes');
 
-handles.saveLoc = uigetdir('C:\');
-cd(handles.saveLoc)
-
-versionCheck = version('-release');
-getYear = str2double(versionCheck(1:end-1));
-if getYear < 2013
-    DS_toggle = 0;
-else
-   DS_toggle = 1;
+switch expquest
+    case 'Yes'
+        handles.saveLoc = uigetdir('C:\');
+        cd(handles.saveLoc)
+        
+        versionCheck = version('-release');
+        getYear = str2double(versionCheck(1:end-1));
+        if getYear < 2013
+            DS_toggle = 0;
+        else
+            DS_toggle = 1;
+        end
+        
+        numofSheets = numel(fieldnames(handles.AllDATA));
+        
+        for nsi = 1:numofSheets
+            
+            tempCols = handles.ExportColnames{nsi};
+            tempSheet = handles.CaseNames{nsi};
+            tempData = handles.AllDATA.(strcat('sheet',num2str(nsi)));
+            
+            % clean up data
+            if isnan(tempData{1,4})
+                tempData = tempData(:,1:3);
+            end
+            
+            if DS_toggle
+                outData = cell2dataset(tempData,'VarNames',tempCols);
+            else
+                % Do something
+            end
+            saveName = char(strcat('ImData_',date,'_',tempSheet,'.xlsx'));
+            export(outData,'XLSfile',saveName)
+        end
+        
+    case 'No'
+        return
 end
 
-numofSheets = numel(fieldnames(handles.AllDATA));
-caseName = inputdlg('Save file ID','FILE name',[1 30],{'data'});
-
-for nsi = 1:numofSheets
-    
-    tempCols = handles.ExportColnames{nsi};
-    tempSheet = handles.CaseNames{nsi};
-    tempData = handles.AllDATA.(strcat('sheet',num2str(nsi)));
-    
-    if DS_toggle
-        outData = cell2dataset(tempData,'VarNames',tempCols);
-    else
-        % Do something
-    end
-    
-    export(outData,'XLSfile',saveName,'sheet',tempSheet)
-end
 
 
-saveName = strcat('AnnalysisOutput_',date,'_',char(caseName),'.xlsx');
 
-export(expData,'XLSfile',saveName);
 
 % --------------------------------------------------------------------
 function expML_Callback(hObject, eventdata, handles)
@@ -930,12 +941,39 @@ function expSTRUCT_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
+expquest = questdlg('Are you sure you want to EXPORT TO STRUCT?','STRUCT?',...
+    'Yes','No','Yes');
 
-% --------------------------------------------------------------------
-function expCELLARRAY_Callback(hObject, eventdata, handles)
-% hObject    handle to expCELLARRAY (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
+switch expquest
+    case 'Yes'
+        handles.saveLoc = uigetdir('C:\');
+        cd(handles.saveLoc)
+        
+        numofSheets = numel(fieldnames(handles.AllDATA));
+        OutData = struct;
+        for nsi = 1:numofSheets
+            
+            tempCols = handles.ExportColnames{nsi};
+            tempSheet = handles.CaseNames{nsi};
+            tempData = handles.AllDATA.(strcat('sheet',num2str(nsi)));
+            
+            % clean up data
+            if isnan(tempData{1,4})
+                tempData = tempData(:,1:3);
+            end
+            
+            
+            for di = 1:length(tempCols)
+                OutData.(tempSheet{1}).(tempCols{di}) = tempData(:,di);
+            end
+        end
+        
+        saveName = char(strcat('ImDataST_',date,'.mat'));
+        save(saveName,'OutData');
+        
+    case 'No'
+        return
+end
 
 
 % --------------------------------------------------------------------
@@ -943,3 +981,42 @@ function expDATASET_Callback(hObject, eventdata, handles)
 % hObject    handle to expDATASET (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
+
+expquest = questdlg('Are you sure you want to EXPORT TO EXCEL?','EXCEL?',...
+    'Yes','No','Yes');
+
+switch expquest
+    case 'Yes'
+        handles.saveLoc = uigetdir('C:\');
+        cd(handles.saveLoc)
+        
+        numofSheets = numel(fieldnames(handles.AllDATA));
+        
+        outDS = dataset;
+        
+        for nsi = 1:numofSheets
+            
+            tempCols = handles.ExportColnames{nsi};
+            tempSheet = handles.CaseNames{nsi};
+            tempData = handles.AllDATA.(strcat('sheet',num2str(nsi)));
+            tempSections = (1:1:size(tempData,1))';
+            tempCases = repmat(handles.CaseNames{nsi},numel(tempSections),1);
+            
+            % clean up data
+            if isnan(tempData{1,4})
+                tempData = tempData(:,1:3);
+            end
+
+            tempCols = ['Cases' , 'Sections' , tempCols];
+            tempData = [num2cell(tempCases) , num2cell(tempSections) , tempData];
+            
+            tempDS = cell2dataset(tempData,'VarNames',tempCols);
+            outDS = [outDS ; tempDS];
+
+        end        
+            saveName = char(strcat('ImDataDS_',date,'.mat'));
+            save(saveName,'outDS');
+        
+    case 'No'
+        return
+end
