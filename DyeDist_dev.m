@@ -27,11 +27,11 @@ function varargout = DyeDist_dev(varargin)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
+
 % THINGS TO DO
 % ADD NEW DISTRIBUTION ANALYSIS by quadrant (3/6/2014)
 % ADD ABILITY TO NAME SHEETS FOR DIFFERENT DATA SETS 
 % FINIALIZE EXPORT FEATURES
-
 
 
 % Begin initialization code - DO NOT EDIT
@@ -89,6 +89,7 @@ if getYear < 2013
     set(handles.expDATASET,'Enable','off')
 end
 
+
 % Create Column titles
 handles.columnNames = {'ROI_Area','Dye_Area','Dye_Ratio','DyeOut_Area','DyeOut_Ratio'};
 set(handles.dataTable,'ColumnName',handles.columnNames);
@@ -99,7 +100,6 @@ handles.hemiCount = 0;
 set(handles.infoT,'String','Load Image Files');
 
 handles.SheetCount = 1;
-
 handles.CaseNames = {};
 
 % Update handles structure
@@ -273,11 +273,11 @@ function roiButton_Callback(hObject, ~, handles)
 set(handles.roiButton,'Enable','off');
 
 caseName = inputdlg('Input Case Name','Case Name',1,{'Case1'});
-
+	
 if isempty(caseName)
-    caseName = 'Case1';
+	    caseName = 'Case1';
 end
-
+	
 % SET UP TOGGLE FOR BOX AND ALGORITHM
 boxQuestion = 1;
 while boxQuestion
@@ -296,7 +296,6 @@ while boxQuestion
     end
     
 end
-
 
 % set(handles.fileOpts,'Enable','off');
 
@@ -357,110 +356,107 @@ for i = 1:length(handles.numSections)
         injImage = imageMatrix(:,:,handles.colorId(2));
         
     end
-    
+
     % Trace Image
     
     cla(handles.imDisplay)
     imshow(traceImage);
     
     set(handles.infoT,'String','Trace Region of Interest');
-    [~, Xcoords{i,1}, Ycoords{i,1}] = roipoly(traceImage);
+    [~, Xcoords{i,1}, Ycoords{i,1}] = roipoly(traceImage);    
     polyArea(i) = polyarea(Xcoords{i,1},Ycoords{i,1});
     
     % Create NTS mask
     mNtb_mask = poly2mask(Xcoords{i,1},Ycoords{i,1},dim1,dim2);
-    
-    if boxToggle % FIND END
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Get sample boxes
-        
-        totPixels = dim1*dim2;
-        onePercent = totPixels*0.005;
-        boxDim = round(sqrt(onePercent));
-        halfBD = round(boxDim/2);
-        
-        cla(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
-        %     axes(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
-        imshow(injThreshImage); % REPEAT THIS LINE OUTSIDE TOGGLE
-        
-        set(handles.infoT,'String','Click three times on Image');
-        [x_coord, y_coord] = ginput(3);
-        set(handles.infoT,'String',[]);
-        x_coord = round(x_coord);
-        y_coord = round(y_coord);
-        
-        sYcoords = cell(1,3);
-        sXcoords = cell(1,3);
-        for si = 1:length(x_coord)
-            sXcoords{1,si} = round([x_coord(si) - halfBD , x_coord(si) + halfBD, x_coord(si) + halfBD, x_coord(si) - halfBD]);
-            sYcoords{1,si} = round([y_coord(si) - halfBD , y_coord(si) - halfBD, y_coord(si) + halfBD, y_coord(si) + halfBD]);
-        end
-        
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-        % Extract data and plot boxes
-        
-        pixelsPerbox = cell(1,3);
-        hold on
-        boxPlotsS = cell(1,3);
-        for sti = 1:3
-            samplebox = roipoly(dim1,dim2,sYcoords{1,sti},sXcoords{1,sti});
-            square_mask = poly2mask(sXcoords{1,sti},sYcoords{1,sti},dim1,dim2);
-            pixelsPerbox{1,sti} = injThreshImage(square_mask);
-            [Bi, ~] = bwboundaries(samplebox,'noholes');
-            boxIndices = cell2mat(Bi);
-            boxPlotsS{1,sti} = boxIndices;
-        end
-        
-        % calculate threshold
-        num_inj_pixels = injImage(mNtb_mask);
-        convertPixels2double = single(num_inj_pixels);
-        
-        handles.pixelsBackground = double([pixelsPerbox{1,1};pixelsPerbox{1,2};pixelsPerbox{1,3};convertPixels2double]);
-        
-        handles.pMean = round(mean(handles.pixelsBackground));
-        handles.pStd = round(std(handles.pixelsBackground));
-        
-        pixThresh = handles.pMean + (str2double(get(handles.stdT,'String'))*handles.pStd);
-        
-        % To ensure that Standard Deviation does not artifically
-        % inflate pixel threshold in excess of 255
-        if pixThresh >= 255
-            pixThresh = pixThresh - (2*handles.pStd);
-            
-            % Double check of pixel threshold 2/23/2014
-            while pixThresh >= 255
-                pixThresh = pixThresh - (handles.pStd/2);
-            end
-            
-        end
 
-    else
+    if boxToggle % FIND END
+	        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	        % Get sample boxes
+	        
+	        totPixels = dim1*dim2;
+	        onePercent = totPixels*0.005;
+	        boxDim = round(sqrt(onePercent));
+	        halfBD = round(boxDim/2);
+	        
+	        cla(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
+	        %     axes(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
+	        imshow(injThreshImage); % REPEAT THIS LINE OUTSIDE TOGGLE
         
+	        set(handles.infoT,'String','Click three times on Image');
+	        [x_coord, y_coord] = ginput(3);
+	        set(handles.infoT,'String',[]);
+	        x_coord = round(x_coord);
+	        y_coord = round(y_coord);
+	        
+	        sYcoords = cell(1,3);
+	        sXcoords = cell(1,3);
+	        for si = 1:length(x_coord)
+	            sXcoords{1,si} = round([x_coord(si) - halfBD , x_coord(si) + halfBD, x_coord(si) + halfBD, x_coord(si) - halfBD]);
+	            sYcoords{1,si} = round([y_coord(si) - halfBD , y_coord(si) - halfBD, y_coord(si) + halfBD, y_coord(si) + halfBD]);
+	        end
+	        
+	        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+	        % Extract data and plot boxes
+	        
+	        pixelsPerbox = cell(1,3);
+	        hold on
+	        boxPlotsS = cell(1,3);
+	        for sti = 1:3
+	            samplebox = roipoly(dim1,dim2,sYcoords{1,sti},sXcoords{1,sti});
+	            square_mask = poly2mask(sXcoords{1,sti},sYcoords{1,sti},dim1,dim2);
+	            pixelsPerbox{1,sti} = injThreshImage(square_mask);
+	            [Bi, ~] = bwboundaries(samplebox,'noholes');
+	            boxIndices = cell2mat(Bi);
+	            boxPlotsS{1,sti} = boxIndices;
+	        end
+	        
+	        % calculate threshold
+	        num_inj_pixels = injImage(mNtb_mask);
+	        convertPixels2double = single(num_inj_pixels);
+	        
+	        handles.pixelsBackground = double([pixelsPerbox{1,1};pixelsPerbox{1,2};pixelsPerbox{1,3};convertPixels2double]);
+	        
+	        handles.pMean = round(mean(handles.pixelsBackground));
+            handles.pStd = round(std(handles.pixelsBackground));
+            
+            pixThresh = handles.pMean + (str2double(get(handles.stdT,'String'))*handles.pStd);
+            
+            % To ensure that Standard Deviation does not artifically
+            % inflate pixel threshold in excess of 255
+            if pixThresh >= 255
+                pixThresh = pixThresh - (2*handles.pStd);
+                
+                % Double check of pixel threshold 2/23/2014
+                while pixThresh >= 255
+                    pixThresh = pixThresh - (handles.pStd/2);
+                end
+                
+            end
+            
+    else
         cla(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
         %     axes(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
         imshow(injThreshImage); % REPEAT THIS LINE OUTSIDE TOGGLE
-        
+
         % calculate threshold
         num_inj_pixels = injImage(mNtb_mask);
         convertPixels2double = single(num_inj_pixels);
         
-        handles.pixelsBackground = double(convertPixels2double);
+        handles.pixelsBackground =  double(convertPixels2double);
         
         handles.pMean = round(mean(handles.pixelsBackground));
         handles.pStd = round(std(handles.pixelsBackground));
         
         pixThresh = handles.pMean + (str2double(get(handles.stdT,'String'))*handles.pStd);
+    end
+    % To ensure that Standard Deviation does not artifically
+    % inflate pixel threshold in excess of 255
+    if pixThresh >= 255
+        pixThresh = pixThresh - (2*handles.pStd);
         
-        % To ensure that Standard Deviation does not artifically
-        % inflate pixel threshold in excess of 255
-        if pixThresh >= 255
-            pixThresh = pixThresh - (2*handles.pStd);
-            
-            % Double check of pixel threshold 2/23/2014
-            while pixThresh >= 255
-                pixThresh = pixThresh - (handles.pStd/2);
-            end
-            
+        % Double check of pixel threshold 2/23/2014
+        while pixThresh >= 255
+            pixThresh = pixThresh - (handles.pStd/2);
         end
         
     end
@@ -476,225 +472,227 @@ for i = 1:length(handles.numSections)
     set(handles.meanT,'String',num2str(handles.pMean));
     set(handles.sdT,'String',num2str(handles.pStd));
     set(handles.thresT,'String',num2str(pixThresh));
-
+        
     if boxToggle
-    
-    % Get box outside polygon
-    maxPpoint = min(Ycoords{i,1});
-    minPpoint = max(Ycoords{i,1});
-    leftPpoint = min(Xcoords{i,1});
-    rightPpoint = max(Xcoords{i,1});
-    midHorz = ((rightPpoint - leftPpoint)/2) + leftPpoint;
-    midVert = ((maxPpoint - minPpoint)/2) + minPpoint;
-    
-    leftBpoint =  leftPpoint - ((midHorz - leftPpoint)/4);
-    rightBpoint = rightPpoint + ((rightPpoint - midHorz)/4);
-    topBpoint = maxPpoint - ((midVert - maxPpoint)/4);
-    bottomBpoint = minPpoint + ((minPpoint - midVert)/4);
-    
-    BoxXcoords = round([leftBpoint , rightBpoint, rightBpoint, leftBpoint]);
-    BoxYcoords = round([topBpoint , topBpoint, bottomBpoint, bottomBpoint]);
-    
-    Out_square_mask = poly2mask(BoxXcoords,BoxYcoords,dim1,dim2);
-    
-    outerbox = roipoly(dim1,dim2,BoxYcoords,BoxXcoords);
-    
-    [oBi, ~] = bwboundaries(outerbox,'noholes');
-    OutboxIndices = cell2mat(oBi);
-    
-    % To get outer ring mask
-    outerRingMask = Out_square_mask & ~mNtb_mask;
-    
-    modImage = injImage; % save image in new file
-    modImage(~mNtb_mask) = 0; % use inverse of mask to get rid of out poly pixels
-    threshExceedIndex = modImage > pixThresh;
-    
-    % Outside injection area
-    
-    modImage2 = injImage;
-    modImage2(~outerRingMask) = 0;
-    OthreshExceedIndex = modImage2 > pixThresh;
-    
-    % to plot image of injection threshold match
-    modImage(~threshExceedIndex) = 0;
-    modImage2(~OthreshExceedIndex) = 0;
-    
-    % calculate area
-    injArea(i) = bwarea(threshExceedIndex);
-    
-    % ADD CODE to INCREASE BOX PROGRAMMTICALLY
-    
-    minRow = min(OutboxIndices(:,2));
-    maxRow = max(OutboxIndices(:,2));
-    minCol = min(OutboxIndices(:,1));
-    maxCol = max(OutboxIndices(:,1));
-    
-    line1 = modImage2(minRow,minCol:maxCol);
-    line2 = modImage2(minRow:maxRow,maxCol);
-    line3 = modImage2(maxRow,minCol:maxCol);
-    line4 = modImage2(minRow:maxRow,minCol);
-    
-    newbox = 0;
-    fline = struct;
-    for line = 1:4
-        switch line
-            case 1
-                percBor = sum(line1 > pixThresh)/numel(line1);
-                
-                nMinRow1 = minRow;
-                while percBor > 0.1 && nMinRow1 ~= dim2;
-                    nMinRow1 = nMinRow1 - 1;
-                    nline1 = injImage(nMinRow1,minCol:maxCol);
-                    
-                    percBor = sum(nline1 > pixThresh)/numel(nline1);
-                    newbox = 1;
-                end
-                
-                fline.line1.y = nMinRow1;
-                fline.line2.y = nMinRow1;
-                
-            case 2
-                percBor = sum(line2 > pixThresh)/numel(line2);
-                
-                nMaxCol2 = maxCol;
-                while percBor > 0.1 && nMaxCol2 ~= dim1;
-                    nMaxCol2 = nMaxCol2 + 1;
-                    nline2 = injImage(minRow:maxRow,nMaxCol2);
-                    
-                    percBor = sum(nline2 > pixThresh)/numel(nline2);
-                    newbox = 1;
-                end
-                
-                fline.line2.x = nMaxCol2;
-                fline.line3.x = nMaxCol2;
-                
-            case 3
-                percBor = sum(line3 > pixThresh)/numel(line3);
-                
-                nMaxRow3 = maxRow;
-                while percBor > 0.1 && nMaxRow3 ~= dim2;
-                    nMaxRow3 = nMaxRow3 + 1;
-                    nline3 = injImage(nMaxRow3,minCol:maxCol);
-                    
-                    percBor = sum(nline3 > pixThresh)/numel(nline3);
-                    newbox = 1;
-                end
-                
-                fline.line3.y = nMaxRow3;
-                fline.line4.y = nMaxRow3;
-                
-                
-            case 4
-                percBor = sum(line4 > pixThresh)/numel(line4);
-                
-                nMinCol4 = minCol;
-                while percBor > 0.1 && nMinCol4 ~= dim1;
-                    nMinCol4 = nMinCol4 - 1;
-                    nline4 = injImage(minRow:maxRow,nMinCol4);
-                    
-                    percBor = sum(nline4 > pixThresh)/numel(nline4);
-                    newbox = 1;
-                end
-                
-                fline.line1.x = nMinCol4;
-                fline.line4.x = nMinCol4;
-                
-        end
-    end
-
-    if newbox
-        nBoxXc = zeros(1,4);
-        nBoxYc = zeros(1,4);
-        for nb = 1:4
-            nBoxXc(nb) = fline.(strcat('line',num2str(nb))).x;
-            nBoxYc(nb) = fline.(strcat('line',num2str(nb))).y;
-        end
+        % Get box outside polygon
+        maxPpoint = min(Ycoords{i,1});
+        minPpoint = max(Ycoords{i,1});
+        leftPpoint = min(Xcoords{i,1});
+        rightPpoint = max(Xcoords{i,1});
+        midHorz = ((rightPpoint - leftPpoint)/2) + leftPpoint;
+        midVert = ((maxPpoint - minPpoint)/2) + minPpoint;
         
-        %RECALCULATE NEW BOX
+        leftBpoint =  leftPpoint - ((midHorz - leftPpoint)/4);
+        rightBpoint = rightPpoint + ((rightPpoint - midHorz)/4);
+        topBpoint = maxPpoint - ((midVert - maxPpoint)/4);
+        bottomBpoint = minPpoint + ((minPpoint - midVert)/4);
         
-        NEW_Out_square_mask = poly2mask(nBoxXc,nBoxYc,dim1,dim2);
+        BoxXcoords = round([leftBpoint , rightBpoint, rightBpoint, leftBpoint]);
+        BoxYcoords = round([topBpoint , topBpoint, bottomBpoint, bottomBpoint]);
         
-        NEW_outerbox = roipoly(dim1,dim2,nBoxYc,nBoxXc);
+        Out_square_mask = poly2mask(BoxXcoords,BoxYcoords,dim1,dim2);
         
-        [NoBi, ~] = bwboundaries(NEW_outerbox,'noholes');
-        NewOutboxIndices = cell2mat(NoBi);
+        outerbox = roipoly(dim1,dim2,BoxYcoords,BoxXcoords);
+        
+        [oBi, ~] = bwboundaries(outerbox,'noholes');
+        OutboxIndices = cell2mat(oBi);
         
         % To get outer ring mask
-        NEWouterRingMask = NEW_Out_square_mask & ~mNtb_mask;
+        outerRingMask = Out_square_mask & ~mNtb_mask;
         
-        % Outside injection area
-        modImage3 = injImage;
-        modImage3(~NEWouterRingMask) = 0;
-        NEWOthreshExceedIndex = modImage3 > pixThresh;
-        
-        % to plot image of injection threshold match
-        modImage(~threshExceedIndex) = 0;
-        modImage3(~NEWOthreshExceedIndex) = 0;
-        
-        % calculate out injection area
-        oinjArea(i) = bwarea(NEWOthreshExceedIndex);
-    end
-    
-    blankImage2 = uint8(zeros(dim1,dim2,3));
-    blankImage2(:,:,1) = modImage;
-    
-    if newbox
-        blankImage2(:,:,3) = modImage3;
-    else
-        blankImage2(:,:,3) = modImage2;
-    end
-    
-    cla(handles.imDisplay)
-    imshow(blankImage2);
-    hold on
-    plot(Xcoords{i,1}, Ycoords{i,1},'-y');
-    
-    if newbox
-        plot(NewOutboxIndices(:,1),NewOutboxIndices(:,2),'r')
-    else
-        plot(OutboxIndices(:,1),OutboxIndices(:,2),'r')
-    end
-    
-    hold on
-    for ip = 1:3
-        plot(boxPlotsS{1,ip}(:,1),boxPlotsS{1,ip}(:,2),'y')
-    end
-    
-    set(handles.infoT,'String','Press enter for next image');
-    handles.figActive = 1;
-    guidata(hObject, handles);
-    
-    % Save file image or not
-    dataFrame = getframe(handles.imDisplay); % LINE BROKEN
-    [handles.im2save,~] = frame2im(dataFrame);
-    guidata(hObject, handles);
-    
-    pause
-    
-    set(handles.infoT,'String',[]);
-    
-    % Area of polygon
-    dataTOout.polyArea(i,1) = round(polyArea(i));
-    % Area of injection in polygon
-    dataTOout.injArea(i,1) = round(injArea(i));
-    % Ratio of injection in polygon
-    dataTOout.polyInjRatio(i,1) = round(((injArea(i)/polyArea(i))*1000))/1000;
-    % Area of injection outside polygon
-    dataTOout.outinjArea(i,1) = round(oinjArea(i));
-    % Ratio of injection outstide polygon
-    tempOArea = oinjArea(i,1)/(oinjArea(i)+injArea(i));
-    dataTOout.injOutRatio(i,1) = round((tempOArea*1000))/1000;
-    
-    else
-        % ADD STUFF
         modImage = injImage; % save image in new file
         modImage(~mNtb_mask) = 0; % use inverse of mask to get rid of out poly pixels
         threshExceedIndex = modImage > pixThresh;
         
+        % Outside injection area
+        
+        modImage2 = injImage;
+        modImage2(~outerRingMask) = 0;
+        OthreshExceedIndex = modImage2 > pixThresh;
+        
+        % to plot image of injection threshold match
+        modImage(~threshExceedIndex) = 0;
+        modImage2(~OthreshExceedIndex) = 0;
+        
+        % calculate area
+        injArea(i) = bwarea(threshExceedIndex);
+        
+        % ADD CODE to INCREASE BOX PROGRAMMTICALLY
+        
+        minRow = min(OutboxIndices(:,2));
+        maxRow = max(OutboxIndices(:,2));
+        minCol = min(OutboxIndices(:,1));
+        maxCol = max(OutboxIndices(:,1));
+        
+        line1 = modImage2(minRow,minCol:maxCol);
+        line2 = modImage2(minRow:maxRow,maxCol);
+        line3 = modImage2(maxRow,minCol:maxCol);
+        line4 = modImage2(minRow:maxRow,minCol);
+        
+        newbox = 0;
+        fline = struct;
+        for line = 1:4
+            switch line
+                case 1
+                    percBor = sum(line1 > pixThresh)/numel(line1);
+                    
+                    nMinRow1 = minRow;
+                    while percBor > 0.1 && nMinRow1 ~= dim2;
+                        nMinRow1 = nMinRow1 - 1;
+                        nline1 = injImage(nMinRow1,minCol:maxCol);
+                        
+                        percBor = sum(nline1 > pixThresh)/numel(nline1);
+                        newbox = 1;
+                    end
+                    
+                    fline.line1.y = nMinRow1;
+                    fline.line2.y = nMinRow1;
+                    
+                case 2
+                    percBor = sum(line2 > pixThresh)/numel(line2);
+                    
+                    nMaxCol2 = maxCol;
+                    while percBor > 0.1 && nMaxCol2 ~= dim1;
+                        nMaxCol2 = nMaxCol2 + 1;
+                        nline2 = injImage(minRow:maxRow,nMaxCol2);
+                        
+                        percBor = sum(nline2 > pixThresh)/numel(nline2);
+                        newbox = 1;
+                    end
+                    
+                    fline.line2.x = nMaxCol2;
+                    fline.line3.x = nMaxCol2;
+                    
+                case 3
+                    percBor = sum(line3 > pixThresh)/numel(line3);
+                    
+                    nMaxRow3 = maxRow;
+                    while percBor > 0.1 && nMaxRow3 ~= dim2;
+                        nMaxRow3 = nMaxRow3 + 1;
+                        nline3 = injImage(nMaxRow3,minCol:maxCol);
+                        
+                        percBor = sum(nline3 > pixThresh)/numel(nline3);
+                        newbox = 1;
+                    end
+                    
+                    fline.line3.y = nMaxRow3;
+                    fline.line4.y = nMaxRow3;
+                    
+                    
+                case 4
+                    percBor = sum(line4 > pixThresh)/numel(line4);
+                    
+                    nMinCol4 = minCol;
+                    while percBor > 0.1 && nMinCol4 ~= dim1;
+                        nMinCol4 = nMinCol4 - 1;
+                        nline4 = injImage(minRow:maxRow,nMinCol4);
+                        
+                        percBor = sum(nline4 > pixThresh)/numel(nline4);
+                        newbox = 1;
+                    end
+                    
+                    fline.line1.x = nMinCol4;
+                    fline.line4.x = nMinCol4;
+                    
+            end
+        end
+        
+        
+        
+        
+        if newbox
+            nBoxXc = zeros(1,4);
+            nBoxYc = zeros(1,4);
+            for nb = 1:4
+                nBoxXc(nb) = fline.(strcat('line',num2str(nb))).x;
+                nBoxYc(nb) = fline.(strcat('line',num2str(nb))).y;
+            end
+            
+            %RECALCULATE NEW BOX
+            
+            NEW_Out_square_mask = poly2mask(nBoxXc,nBoxYc,dim1,dim2);
+            
+            NEW_outerbox = roipoly(dim1,dim2,nBoxYc,nBoxXc);
+            
+            [NoBi, ~] = bwboundaries(NEW_outerbox,'noholes');
+            NewOutboxIndices = cell2mat(NoBi);
+            
+            % To get outer ring mask
+            NEWouterRingMask = NEW_Out_square_mask & ~mNtb_mask;
+            
+            % Outside injection area
+            modImage3 = injImage;
+            modImage3(~NEWouterRingMask) = 0;
+            NEWOthreshExceedIndex = modImage3 > pixThresh;
+            
+            % to plot image of injection threshold match
+            modImage(~threshExceedIndex) = 0;
+            modImage3(~NEWOthreshExceedIndex) = 0;
+            
+            % calculate out injection area
+            oinjArea(i) = bwarea(NEWOthreshExceedIndex);
+        end
+        
+        blankImage2 = uint8(zeros(dim1,dim2,3));
+        blankImage2(:,:,1) = modImage;
+        
+        if newbox
+            blankImage2(:,:,3) = modImage3;
+        else
+            blankImage2(:,:,3) = modImage2;
+        end
+        
+        cla(handles.imDisplay)
+        imshow(blankImage2);
+        hold on
+        plot(Xcoords{i,1}, Ycoords{i,1},'-y');
+        
+        if newbox
+            plot(NewOutboxIndices(:,1),NewOutboxIndices(:,2),'r')
+        else
+            plot(OutboxIndices(:,1),OutboxIndices(:,2),'r')
+        end
+        
+        hold on
+        for ip = 1:3
+            plot(boxPlotsS{1,ip}(:,1),boxPlotsS{1,ip}(:,2),'y')
+        end
+        
+        set(handles.infoT,'String','Press enter for next image');
+        handles.figActive = 1;
+        guidata(hObject, handles);
+        
+        % Save file image or not
+        dataFrame = getframe(handles.imDisplay); % LINE BROKEN
+        [handles.im2save,~] = frame2im(dataFrame);
+        guidata(hObject, handles);
+        
+        pause
+        
+        set(handles.infoT,'String',[]);
+        
+        
+        
+        % Area of polygon
+        dataTOout.polyArea(i,1) = round(polyArea(i));
+        % Area of injection in polygon
+        dataTOout.injArea(i,1) = round(injArea(i));
+        % Ratio of injection in polygon
+        dataTOout.polyInjRatio(i,1) = round(((injArea(i)/polyArea(i))*1000))/1000;
+        % Area of injection outside polygon
+        dataTOout.outinjArea(i,1) = round(oinjArea(i));
+        % Ratio of injection outstide polygon
+        tempOArea = oinjArea(i,1)/(oinjArea(i)+injArea(i));
+        dataTOout.injOutRatio(i,1) = round((tempOArea*1000))/1000;
+        
+        
+    else
+        modImage = injImage; % save image in new file
+        modImage(~mNtb_mask) = 0; % use inverse of mask to get rid of out poly pixels
+        threshExceedIndex = modImage > pixThresh;
         % to plot image of injection threshold match
         modImage(~threshExceedIndex) = 0;
         
-        % calculate area
         injArea(i) = bwarea(threshExceedIndex);
         
         blankImage2 = uint8(zeros(dim1,dim2,3));
@@ -710,7 +708,7 @@ for i = 1:length(handles.numSections)
         guidata(hObject, handles);
         
         % Save file image or not
-        dataFrame = getframe(handles.imDisplay);
+        dataFrame = getframe(handles.imDisplay); % LINE BROKEN
         [handles.im2save,~] = frame2im(dataFrame);
         guidata(hObject, handles);
         
@@ -728,29 +726,39 @@ for i = 1:length(handles.numSections)
         dataTOout.outinjArea(i,1) = NaN;
         % Ratio of injection outstide polygon
         dataTOout.injOutRatio(i,1) = NaN;
-        
     end
-    
-    
     tempDout = [dataTOout.polyArea , dataTOout.injArea , dataTOout.polyInjRatio,...
         dataTOout.outinjArea , dataTOout.injOutRatio];
     
     set(handles.dataTable,'Data',num2cell(tempDout))
     
     % INCORPORATE ADDITIOINAL SHEETS
-    
 end
 
 handles.AllDATA.(strcat('sheet',num2str(handles.SheetCount))) = get(handles.dataTable,'Data');
 handles.CaseNames{handles.SheetCount} = caseName;
-
+ 	
 set(handles.dataTable,'Data','');
-
 handles.SheetCount = handles.SheetCount + 1;
-
+% DETERMINE IF USER WANTS TO ANALYZE ANOTHER DATA SET
 msgbox('To Start another image set select LOAD FOLDER', 'INFO','help');
-
+ 	
 cla(handles.imDisplay)
+% if handles.hemiCount == 1;
+%     cla(handles.imDisplay)
+%     set(handles.infoT,'String','Select opposite Hemisphere');
+% elseif handles.hemiCount == 2;
+%     set(handles.infoT,'String','Analysis Complete!');
+%     cla(handles.imDisplay)
+%     set(handles.gThresh,'Enable','off')
+%     set(handles.roiButton,'Enable','off')
+%     set(handles.hemiPanel,'Visible','off')
+%     set(handles.fileOpts,'Enable','on');
+%     set(handles.expXl,'Enable','on');
+%     
+% end
+
+
 
 guidata(hObject, handles);
 
@@ -874,7 +882,6 @@ function expXl_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% WORK ON EXPORT STUFF
 
 handles.saveLoc = uigetdir('C:\');
 cd(handles.saveLoc)
@@ -884,15 +891,12 @@ getYear = str2double(versionCheck(1:end-1));
 if getYear < 2013
     DS_toggle = 0;
 else
-    DS_toggle = 1;
+   DS_toggle = 1;
 end
 
-% Get number of sheets
 numofSheets = numel(fieldnames(handles.AllDATA));
-
-% Get number of columns needed
 caseName = inputdlg('Save file ID','FILE name',[1 30],{'data'});
-saveName = strcat('AnnalysisOutput_',date,'_',char(caseName),'.xlsx');
+
 for nsi = 1:numofSheets
     
     tempCols = handles.ExportColnames{nsi};
@@ -909,6 +913,10 @@ for nsi = 1:numofSheets
 end
 
 
+saveName = strcat('AnnalysisOutput_',date,'_',char(caseName),'.xlsx');
+
+export(expData,'XLSfile',saveName);
+
 % --------------------------------------------------------------------
 function expML_Callback(hObject, eventdata, handles)
 % hObject    handle to expML (see GCBO)
@@ -922,16 +930,6 @@ function expSTRUCT_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-expquest = questdlg('Are you sure you want to EXPORT to STRUCT?','Export to STRUCT?',...
-    'Yes','No','Yes');
-
-switch expquest
-    case 'Yes'
-        % ADD EXPORT CODE
-
-    case 'No'
-        return
-end
 
 % --------------------------------------------------------------------
 function expCELLARRAY_Callback(hObject, eventdata, handles)
@@ -939,30 +937,9 @@ function expCELLARRAY_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-exptquest = questdlg('Are you sure you want to EXPORT to CELLARRAY?','Export to CELLARRAY?',...
-    'Yes','No','Yes');
-
-switch exptquest
-    case 'Yes'
-        % ADD EXPORT CODE
-        
-    case 'No'
-        return
-end
 
 % --------------------------------------------------------------------
 function expDATASET_Callback(hObject, eventdata, handles)
 % hObject    handle to expDATASET (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-
-expquest = questdlg('Are you sure you want to EXPORT to DATASET?','Export to DATASET?',...
-    'Yes','No','Yes');
-
-switch expquest
-    case 'Yes'
-        % ADD EXPORT CODE
-        
-    case 'No'
-        return
-end
