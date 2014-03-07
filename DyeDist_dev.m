@@ -30,8 +30,7 @@ function varargout = DyeDist_dev(varargin)
 
 % THINGS TO DO
 % ADD NEW DISTRIBUTION ANALYSIS by quadrant (3/6/2014)
-% ADD ABILITY TO NAME SHEETS FOR DIFFERENT DATA SETS 
-% FINIALIZE EXPORT FEATURES
+
 
 
 % Begin initialization code - DO NOT EDIT
@@ -435,11 +434,13 @@ for i = 1:length(handles.numSections)
             
     else
         cla(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
-        %     axes(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
         imshow(injThreshImage); % REPEAT THIS LINE OUTSIDE TOGGLE
 
         % calculate threshold
         num_inj_pixels = injImage(mNtb_mask);
+        
+        % CREATE BISECTED POLYGON FUNCTION
+        
         convertPixels2double = single(num_inj_pixels);
         
         handles.pixelsBackground =  double(convertPixels2double);
@@ -596,10 +597,7 @@ for i = 1:length(handles.numSections)
                     
             end
         end
-        
-        
-        
-        
+
         if newbox
             nBoxXc = zeros(1,4);
             nBoxYc = zeros(1,4);
@@ -670,9 +668,7 @@ for i = 1:length(handles.numSections)
         pause
         
         set(handles.infoT,'String',[]);
-        
-        
-        
+
         % Area of polygon
         dataTOout.polyArea(i,1) = round(polyArea(i));
         % Area of injection in polygon
@@ -924,10 +920,6 @@ switch expquest
         return
 end
 
-
-
-
-
 % --------------------------------------------------------------------
 function expML_Callback(hObject, eventdata, handles)
 % hObject    handle to expML (see GCBO)
@@ -982,7 +974,7 @@ function expDATASET_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-expquest = questdlg('Are you sure you want to EXPORT TO EXCEL?','EXCEL?',...
+expquest = questdlg('Are you sure you want to EXPORT TO DATASET?','DATASET?',...
     'Yes','No','Yes');
 
 switch expquest
