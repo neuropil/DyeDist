@@ -1,23 +1,14 @@
-function [SegmentsCellCount, BW] = QuadsectPolygon(blueChannel)
+function [Quadrants] = QSectPoly_v01(xCoords, yCoords, mask, imageChannel)
 
+Quadrants = struct;
 
-[BW, xCoords, yCoords] = roipoly();
+[B,~,~,~] = bwboundaries(mask);
 
+pixelInfo = regionprops(mask,imageChannel,'Centroid');
 
-%%
-
-[B,~,~,~] = bwboundaries(BW);
-hold on
-
-pixelInfo = regionprops(BW,blueChannel,'Centroid');
-
-plot((B{1,1}(:,2)),(B{1,1}(:,1)), 'k-', 'Linewidth', 3);
-plot(xCoords,yCoords, 'ro', 'MarkerSize', 10);
-plot(pixelInfo.Centroid(1),pixelInfo.Centroid(2),'r.', 'MarkerSize',15)
-
-xmin = min(xCoords);
+% xmin = min(xCoords);
 xmax = max(xCoords);
-ymin = min(yCoords);
+% ymin = min(yCoords);
 ymax = max(yCoords);
 
 % find corner vertices
@@ -28,6 +19,8 @@ yCorR = zeros(numel(yCor),1);
 for i = 1:numel(yCor)
    yCorR(i) = yCor(i) + rand; 
 end
+
+yCor = yCorR;
 
 xCorR = zeros(numel(xCor),1);
 for i = 1:numel(xCor)
@@ -75,14 +68,10 @@ if sum(topLeft) ~= 1
     end
 end
 
-plot(xCor(topLeft),yCor(topLeft), 'y.', 'MarkerSize', 20);
-
 %% Bottom Left corner
 botLeft = (yCor > ymax*0.5 & xCor < xmax*0.5);
 yratio = 0.5;
 xratio = 0.5;
-
-
 
 if sum(botLeft) ~= 1
     if sum(botLeft) == 0 % too conservative
@@ -116,8 +105,6 @@ if sum(botLeft) ~= 1
     end
 end
 
-plot(xCor(botLeft),yCor(botLeft), 'y.', 'MarkerSize', 20);
-
 %% Bottom Right corner
 botRight = (yCor > ymax*0.5 & xCor > xmax*0.5); 
 yratio = 0.5;
@@ -138,8 +125,6 @@ if sum(botRight) ~= 1
         end
     end
 end
-
-plot(xCor(botRight),yCor(botRight), 'y.', 'MarkerSize', 20);
         
 %% Top Right corner
 topRight = (yCor < ymax*0.5 & xCor > xmax*0.5); 
@@ -179,33 +164,23 @@ if sum(topRight) ~= 1
     end
 end
 
-plot(xCor(topRight),yCor(topRight), 'y.', 'MarkerSize', 20);
-
 %% THIS IS CORRECT
 
 % Top Coordinate
 topMidDist = (xCor(topRight) + xCor(topLeft))/2;
 topCoord = min(find(B{1,1}(:,2) == floor(topMidDist) & B{1,1}(:,1) < ymax*0.6));
 
-plot((B{1,1}(topCoord,2)),(B{1,1}(topCoord,1)), 'g.','MarkerSize', 20);
-
 % Bottom Coordinate
 botMidDist = (xCor(botRight) + xCor(botLeft))/2;
 botCoord = max(find(B{1,1}(:,2) == floor(botMidDist) & B{1,1}(:,1) > ymax*0.6));
-
-plot((B{1,1}(botCoord,2)),(B{1,1}(botCoord,1)), 'g.','MarkerSize', 20);
 
 % Left Coordinate
 leftMidDist = (yCor(topLeft) + yCor(botLeft))/2;
 leftCoord = min(find(B{1,1}(:,1) == floor(leftMidDist) & B{1,1}(:,2) < xmax*0.6));
 
-plot((B{1,1}(leftCoord,2)),(B{1,1}(leftCoord,1)), 'g.','MarkerSize', 20);
-
 % Right Coordinate
 rightMidDist = (yCor(topRight) + yCor(botRight))/2;
 rightCoord = max(find(B{1,1}(:,1) == ceil(rightMidDist) & B{1,1}(:,2) > xmax*0.6));
-
-plot((B{1,1}(rightCoord,2)),(B{1,1}(rightCoord,1)), 'g.','MarkerSize', 20);
 
 %% Quadrant 1
 
@@ -246,10 +221,10 @@ quad_1 = [quad1Xfinal quad1Yfinal];
 
 % Create polygon handles for quadrant 1
 
-h = impoly(gca, quad_1);
+h = impoly(imageChannel, quad_1);
 
 %% Quadrant 1 Mask
-segment1 = createMask(h);
+Quadrants.TL = createMask(h);
 
 %% Quadrant 2
 
@@ -289,7 +264,7 @@ quad_2 = [quad2Xfinal quad2Yfinal];
 h2 = impoly(gca, quad_2);
 
 %% Quadrant 2 Mask
-segment2 = createMask(h2);
+Quadrants.BL = createMask(h2);
 
 %% Quadrant 3
 
@@ -327,7 +302,7 @@ quad_3 = [quad3Xfinal quad3Yfinal];
 h3 = impoly(gca, quad_3);
 
 %% Quadrant 3 Mask
-segment3 = createMask(h3);
+Quadrants.BR = createMask(h3);
 
 %% Quadrant 4
 
@@ -363,19 +338,11 @@ quad4Yfinal = [quad4Yout ; quadrant_4_Ycoords(2:3)];
 
 quad_4 = [quad4Xfinal quad4Yfinal];
 
-%
-
 h4 = impoly(gca, quad_4);
 
-%%
+%% Quadrant 4 Mask
+Quadrants.BL = createMask(h4);
 
-segment4 = createMask(h4);
-
-%% Output
-
-for si = 1:6
-    SegmentsCellCount.(char(strcat('segmentQ',num2str(si)))) = eval(strcat('segment',num2str(si)));
-end
 
 
 

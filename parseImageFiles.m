@@ -119,7 +119,7 @@ if chanNum == 1
 % Look for number
 elseif chanNum > 1
     
-    imFnums = cellfun(@(x) str2double(regexp(x,'[0-9]','match')), imFileNames);
+    imFnums = cellfun(@(x) str2double(regexp(x,'[0-9]+','match')), imFileNames);
     
     imFnums = num2cell(imFnums);
     

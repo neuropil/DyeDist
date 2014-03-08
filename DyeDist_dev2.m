@@ -1,28 +1,28 @@
-function varargout = DyeDist_dev(varargin)
-% DYEDIST_DEV MATLAB code for DyeDist_dev.fig
-%      DYEDIST_DEV, by itself, creates a new DYEDIST_DEV or raises the existing
+function varargout = DyeDist_dev2(varargin)
+% DYEDIST_DEV2 MATLAB code for DyeDist_dev2.fig
+%      DYEDIST_DEV2, by itself, creates a new DYEDIST_DEV2 or raises the existing
 %      singleton*.
 %
-%      H = DYEDIST_DEV returns the handle to a new DYEDIST_DEV or the handle to
+%      H = DYEDIST_DEV2 returns the handle to a new DYEDIST_DEV2 or the handle to
 %      the existing singleton*.
 %
-%      DYEDIST_DEV('CALLBACK',hObject,eventData,handles,...) calls the local
-%      function named CALLBACK in DYEDIST_DEV.M with the given input arguments.
+%      DYEDIST_DEV2('CALLBACK',hObject,eventData,handles,...) calls the local
+%      function named CALLBACK in DYEDIST_DEV2.M with the given input arguments.
 %
-%      DYEDIST_DEV('Property','Value',...) creates a new DYEDIST_DEV or raises the
+%      DYEDIST_DEV2('Property','Value',...) creates a new DYEDIST_DEV2 or raises the
 %      existing singleton*.  Starting from the left, property value pairs are
-%      applied to the GUI before DyeDist_dev_OpeningFcn gets called.  An
+%      applied to the GUI before DyeDist_dev2_OpeningFcn gets called.  An
 %      unrecognized property name or invalid value makes property application
-%      stop.  All inputs are passed to DyeDist_dev_OpeningFcn via varargin.
+%      stop.  All inputs are passed to DyeDist_dev2_OpeningFcn via varargin.
 %
 %      *See GUI Options on GUIDE's Tools menu.  Choose "GUI allows only one
 %      instance to run (singleton)".
 %
 % See also: GUIDE, GUIDATA, GUIHANDLES
 
-% Edit the above text to modify the response to help DyeDist_dev
+% Edit the above text to modify the response to help DyeDist_dev2
 
-% Last Modified by GUIDE v2.5 04-Mar-2014 14:57:15
+% Last Modified by GUIDE v2.5 07-Mar-2014 11:32:52
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -37,8 +37,8 @@ function varargout = DyeDist_dev(varargin)
 gui_Singleton = 1;
 gui_State = struct('gui_Name',       mfilename, ...
     'gui_Singleton',  gui_Singleton, ...
-    'gui_OpeningFcn', @DyeDist_dev_OpeningFcn, ...
-    'gui_OutputFcn',  @DyeDist_dev_OutputFcn, ...
+    'gui_OpeningFcn', @DyeDist_dev2_OpeningFcn, ...
+    'gui_OutputFcn',  @DyeDist_dev2_OutputFcn, ...
     'gui_LayoutFcn',  [] , ...
     'gui_Callback',   []);
 if nargin && ischar(varargin{1})
@@ -53,15 +53,15 @@ end
 % End initialization code - DO NOT EDIT
 % JAT 11/19/2013 7:07pm
 
-% --- Executes just before DyeDist_dev is made visible.
-function DyeDist_dev_OpeningFcn(hObject, ~, handles, varargin)
+% --- Executes just before DyeDist_dev2 is made visible.
+function DyeDist_dev2_OpeningFcn(hObject, ~, handles, varargin)
 % This function has no output args, see OutputFcn.
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% varargin   command line arguments to DyeDist_dev (see VARARGIN)
+% varargin   command line arguments to DyeDist_dev2 (see VARARGIN)
 
-% Choose default command line output for DyeDist_dev
+% Choose default command line output for DyeDist_dev2
 handles.output = hObject;
 
 set(handles.sectList,'Enable','off')
@@ -104,12 +104,12 @@ handles.CaseNames = {};
 % Update handles structure
 guidata(hObject, handles);
 
-% UIWAIT makes DyeDist_dev wait for user response (see UIRESUME)
+% UIWAIT makes DyeDist_dev2 wait for user response (see UIRESUME)
 % uiwait(handles.figure1);
 
 
 % --- Outputs from this function are returned to the command line.
-function varargout = DyeDist_dev_OutputFcn(~, ~, handles)
+function varargout = DyeDist_dev2_OutputFcn(~, ~, handles)
 % varargout  cell array for returning output args (see VARARGOUT);
 % hObject    handle to figure
 % eventdata  reserved - to be defined in a future version of MATLAB
@@ -144,7 +144,7 @@ cd(handles.WD)
 % Setup initial indicies
 dirNames = dir('*.tif');
 actualNames = {dirNames.name}';
-handles.ImgNames = actualNames(cellfun(@(x) strcmp('s',x(1)),actualNames));
+handles.ImgNames = actualNames;
 
 % Error hanlding %
 if isempty(handles.ImgNames)
@@ -312,16 +312,20 @@ injArea = zeros(length(handles.numSections),1);
 oinjArea = zeros(length(handles.numSections),1);
 
 dataTOout = struct;
-
+handles.quadInfo = {};
 axes(handles.imDisplay)
 
 %%%%% FIGURE HOW TO KEEP TRACK OF MULTIPLE CASES/SHEETS
+
+Quadrants = cell(1,length(handles.numSections));
 
 for i = 1:length(handles.numSections)
     
     cd(handles.WD)
     
     set(handles.sectList,'Value',i);
+    
+
     
     if isfield(handles.imageINFO,'Image');
         imageToggle = 0;
@@ -433,17 +437,11 @@ for i = 1:length(handles.numSections)
             end
             
     else
-        cla(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
-        imshow(injThreshImage); % REPEAT THIS LINE OUTSIDE TOGGLE
+        cla(handles.imDisplay); 
+        imshow(injThreshImage); 
 
         % calculate threshold
         num_inj_pixels = injImage(mNtb_mask);
-        
-        % CREATE BISECTED POLYGON FUNCTION
-        
-        [Quadrants] = QSectPoly_v01(Xcoords{i,1}, Ycoords{i,1}, mNtb_mask, traceImage(:,:,1))
-
-        
         convertPixels2double = single(num_inj_pixels);
         
         handles.pixelsBackground =  double(convertPixels2double);
@@ -452,6 +450,396 @@ for i = 1:length(handles.numSections)
         handles.pStd = round(std(handles.pixelsBackground));
         
         pixThresh = handles.pMean + (str2double(get(handles.stdT,'String'))*handles.pStd);
+        
+        modImage = injImage; % save image in new file
+        modImage(~mNtb_mask) = 0; % use inverse of mask to get rid of out poly pixels
+        threshExceedIndex = modImage > pixThresh;
+        % to plot image of injection threshold match
+        modImage(~threshExceedIndex) = 0;
+        
+        injArea(i) = bwarea(threshExceedIndex); % BASELINE 
+        
+        % CREATE BISECTED POLYGON FUNCTION
+        
+        [B,~,~,~] = bwboundaries(mNtb_mask);
+        
+        pixelInfo = regionprops(mNtb_mask,traceImage(:,:,handles.colorId(1)),'Centroid');
+        
+        % xmin = min(xCoords);
+        xmax = max(Xcoords{i,1});
+        % ymin = min(yCoords);
+        ymax = max(Ycoords{i,1});
+        
+        % find corner vertices
+        xCor = Xcoords{i,1}(2:end);
+        yCor = Ycoords{i,1}(2:end);
+        
+        yCorR = zeros(numel(yCor),1);
+        for yi = 1:numel(yCor)
+            yCorR(yi) = yCor(yi) + rand;
+        end
+        
+        yCor = yCorR;
+        
+        xCorR = zeros(numel(xCor),1);
+        for xi = 1:numel(xCor)
+            xCorR(xi) = xCor(xi) + rand;
+        end
+        
+        xCor = xCorR;
+        
+        % Top Left corner
+        topLeft = (yCor < ymax*0.5 & xCor < xmax*0.5);
+        yratio = 0.5;
+        xratio = 0.5;
+        
+        if sum(topLeft) ~= 1
+            if sum(topLeft) == 0
+                
+                while sum(topLeft) ~= 1
+                    yratio = yratio + 0.001;
+                    yval = ymax*yratio;
+                    xratio = xratio + 0.001;
+                    xval = ymax*xratio;
+                    if sum(yCor < yval) == 0
+                        topLeft = (yCor == min(yCor) & xCor < xval);
+                    elseif sum(xCor < xval) == 0
+                        topLeft = (yCor < yval & xCor == min(xCor));
+                    else
+                        topLeft = (yCor < yval & xCor < xval);
+                    end
+                end
+                
+            elseif sum(topLeft) > 1 % too liberal
+                while sum(topLeft) ~= 1
+                    yratio = yratio - 0.001;
+                    yval = ymax*yratio;
+                    xratio = xratio - 0.001;
+                    xval = ymax*xratio;
+                    if sum(yCor < yval) == 0
+                        topLeft = (yCor == min(yCor) & xCor < xval);
+                    elseif sum(xCor < xval) == 0
+                        topLeft = (yCor < yval & xCor == min(xCor));
+                    else
+                        topLeft = (yCor < yval & xCor < xval);
+                    end
+                end
+            end
+        end
+        
+        % Bottom Left corner
+        botLeft = (yCor > ymax*0.5 & xCor < xmax*0.5);
+        yratio = 0.5;
+        xratio = 0.5;
+        
+        if sum(botLeft) ~= 1
+            if sum(botLeft) == 0 % too conservative
+                while sum(botLeft) ~= 1
+                    yratio = yratio - 0.001;
+                    yval = ymax*yratio;
+                    xratio = xratio + 0.001;
+                    xval = ymax*xratio;
+                    if sum(yCor > yval) == 0
+                        botLeft = (yCor == max(yCor) & xCor < xval);
+                    elseif sum(xCor < xval) == 0
+                        botLeft = (yCor > yval & xCor == min(xCor));
+                    else
+                        botLeft = (yCor > yval & xCor < xval);
+                    end
+                end
+            elseif sum(botLeft) > 1 % too liberal
+                while sum(botLeft) ~= 1
+                    yratio = yratio + 0.001;
+                    yval = ymax*yratio;
+                    xratio = xratio - 0.001;
+                    xval = ymax*xratio;
+                    if sum(yCor > yval) == 0
+                        botLeft = (yCor == max(yCor) & xCor < xval);
+                    elseif sum(xCor < xval) == 0
+                        botLeft = (yCor > yval & xCor == min(xCor));
+                    else
+                        botLeft = (yCor > yval & xCor < xval);
+                    end
+                end
+            end
+        end
+        
+        % Bottom Right corner
+        botRight = (yCor > ymax*0.5 & xCor > xmax*0.5);
+        yratio = 0.5;
+        xratio = 0.5;
+        
+        if sum(botRight) ~= 1
+            if sum(botRight) == 0
+                while sum(botRight) ~= 1 % too conservative
+                    yratio = yratio - 0.01;
+                    xratio = xratio - 0.01;
+                    botRight = (yCor > ymax*yratio & xCor > xmax*xratio);
+                end
+            elseif sum(botRight) > 1
+                while sum(botRight) ~= 1 % too liberal
+                    yratio = yratio + 0.01;
+                    xratio = xratio + 0.01;
+                    botRight = (yCor > ymax*yratio & xCor > xmax*xratio);
+                end
+            end
+        end
+        
+        % Top Right corner
+        topRight = (yCor < ymax*0.5 & xCor > xmax*0.5);
+        yratio = 0.5;
+        xratio = 0.5;
+        
+        if sum(topRight) ~= 1
+            if sum(topRight) == 0
+                
+                if sum(yCor < ymax*0.5) == 0
+                    
+                    maxSortx = sort(xCor,'descend');
+                    tri = 1;
+                    while sum(topRight) ~= 1 % too conservative
+                        maxNow = maxSortx(1:tri);
+                        xVals = ismember(xCor, maxNow);
+                        yratio = yratio + 0.01;
+                        topRight = (xVals & yCor < ymax*yratio);
+                        tri = 1 + 1;
+                    end
+                    
+                else
+                    
+                    while sum(topRight) ~= 1 % too conservative
+                        yratio = yratio + 0.01;
+                        xratio = xratio - 0.01;
+                        topRight = (yCor < ymax*yratio & xCor > xmax*xratio);
+                    end
+                    
+                end
+            elseif sum(topRight) > 1
+
+                while sum(topRight) ~= 1 % too liberal
+                    yratio = yratio - 0.001;
+                    xratio = xratio + 0.001;
+                    topRight = (yCor < ymax*yratio & xCor > xmax*xratio);
+                end
+            end
+        end
+       
+        
+        % Top Coordinate
+        topMidDist = (xCor(topRight) + xCor(topLeft))/2;
+        topCoord = min(find(B{1,1}(:,2) == floor(topMidDist) & B{1,1}(:,1) < ymax*0.6));
+        
+        % Bottom Coordinate
+        botMidDist = (xCor(botRight) + xCor(botLeft))/2;
+        botCoord = max(find(B{1,1}(:,2) == floor(botMidDist) & B{1,1}(:,1) > ymax*0.6));
+        
+        % Left Coordinate
+        leftMidDist = (yCor(topLeft) + yCor(botLeft))/2;
+        leftCoord = min(find(B{1,1}(:,1) == floor(leftMidDist) & B{1,1}(:,2) < xmax*0.6));
+        
+        % Right Coordinate
+        rightMidDist = (yCor(topRight) + yCor(botRight))/2;
+        rightCoord = max(find(B{1,1}(:,1) == ceil(rightMidDist) & B{1,1}(:,2) > xmax*0.6));
+        
+        % Quadrant 1
+        
+        % Quadrant 1 will be the TOP LEFT QUADRANT
+        
+        % Set the three anchor vertices (centriod, top , left)
+        q1_coord1 = [pixelInfo.Centroid(1) ; pixelInfo.Centroid(2)];
+        q1_coord2 = [(B{1,1}(leftCoord,2));(B{1,1}(leftCoord,1))];
+        q1_coord3 = [(B{1,1}(topCoord,2));(B{1,1}(topCoord,1))];
+        
+        % Create X and Y coordinates out of vertices
+        quadrant_1_Xcoords = [q1_coord1(1);q1_coord2(1);q1_coord3(1)];
+        quadrant_1_Ycoords = [q1_coord1(2);q1_coord2(2);q1_coord3(2)];
+        
+        q1_test = ((yCor < quadrant_1_Ycoords(1) & yCor < quadrant_1_Ycoords(2)) &...
+            (xCor < quadrant_1_Xcoords(1) & xCor < quadrant_1_Xcoords(3)));
+        
+        % Get indices for found coordinates
+        Quad1_coord_indices = find(q1_test == 1);
+        Quad1Flip = flipud(Quad1_coord_indices);
+        
+        % Insert found vertices into quadrant coordinates
+        quad1Xtemp = quadrant_1_Xcoords(1:2);
+        quad1Ytemp = quadrant_1_Ycoords(1:2);
+        quad1Xout = quad1Xtemp;
+        quad1Yout = quad1Ytemp;
+        for q1i2 = 1:length(Quad1Flip);
+            addXquad1 = xCor(Quad1Flip(q1i2));
+            addYquad1 = yCor(Quad1Flip(q1i2));
+            quad1Xout = [quad1Xout ; addXquad1];
+            quad1Yout = [quad1Yout ; addYquad1];
+        end
+        
+        quad1Xfinal = [quad1Xout ; quadrant_1_Xcoords(3)];
+        quad1Yfinal = [quad1Yout ; quadrant_1_Ycoords(3)];
+        
+        quadCoords.TL = [quad1Xfinal quad1Yfinal];
+        
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,1} = quadCoords.TL;
+%         h = impoly(injImage, quad_1);
+        
+        % Quadrant 1 Mask
+%         Quadrants.TL = createMask(h);
+        
+        % Quadrant 2
+        
+        % Quadrant 2 will be the BOTTOM LEFT QUADRANT
+        
+        q2_coord1 = [pixelInfo.Centroid(1) ; pixelInfo.Centroid(2)];
+        q2_coord2 = [(B{1,1}(botCoord,2));(B{1,1}(botCoord,1))];
+        q2_coord3 = [(B{1,1}(leftCoord,2));(B{1,1}(leftCoord,1))];
+        
+        quadrant_2_Xcoords = [q2_coord1(1);q2_coord2(1);q2_coord3(1)];
+        quadrant_2_Ycoords = [q2_coord1(2);q2_coord2(2);q2_coord3(2)];
+        
+        q2_test = ((yCor > quadrant_2_Ycoords(1) & yCor > quadrant_2_Ycoords(3)) &...
+            (xCor < quadrant_2_Xcoords(1) & xCor < quadrant_2_Xcoords(2)));
+        
+        Quad2_coord_indices = find(q2_test == 1);
+        
+        % Insert found vertices into quadrant coordinates
+        quad2Xtemp = quadrant_2_Xcoords(1:2);
+        quad2Ytemp = quadrant_2_Ycoords(1:2);
+        quad2Xout = quad2Xtemp;
+        quad2Yout = quad2Ytemp;
+        for q1i2 = 1:length(Quad2_coord_indices);
+            addXquad2 = xCor(Quad2_coord_indices(q1i2));
+            addYquad2 = yCor(Quad2_coord_indices(q1i2));
+            quad2Xout = [quad2Xout ; addXquad2];
+            quad2Yout = [quad2Yout ; addYquad2];
+        end
+        
+        quad2Xfinal = [quad2Xout ; quadrant_2_Xcoords(3)];
+        quad2Yfinal = [quad2Yout ; quadrant_2_Ycoords(3)];
+        
+        quadCoords.BL = [quad2Xfinal quad2Yfinal];
+        
+        % Create polygon handles for quadrant 2
+        
+%         h2 = impoly(gca, quad_2);
+        
+        % Quadrant 2 Mask
+%         Quadrants.BL = createMask(h2);
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,2} = quadCoords.BL;
+        
+        % Quadrant 3
+        
+        % Quadrant 3 will be the BOTTOM RIGHT QUADRANT
+        
+        q3_coord1 = [(B{1,1}(rightCoord,2));(B{1,1}(rightCoord,1))];
+        q3_coord2 = [pixelInfo.Centroid(1) ; pixelInfo.Centroid(2)];
+        q3_coord3 = [(B{1,1}(botCoord,2));(B{1,1}(botCoord,1))];
+        
+        quadrant_3_Xcoords = [q3_coord1(1);q3_coord2(1);q3_coord3(1)];
+        quadrant_3_Ycoords = [q3_coord1(2);q3_coord2(2);q3_coord3(2)];
+        
+        % Find vertices
+        q3_test = ((yCor > quadrant_3_Ycoords(1) & yCor > quadrant_3_Ycoords(2)) &...
+            (xCor > quadrant_3_Xcoords(2) & xCor > quadrant_3_Xcoords(3)));
+        
+        Quad3_coord_indices = find(q3_test == 1);
+        Quad3Flip = flipud(Quad3_coord_indices);
+        % Insert found vertices into quadrant coordinates
+        
+        quad3Xout = quadrant_3_Xcoords;
+        quad3Yout = quadrant_3_Ycoords;
+        for q1i2 = 1:length(Quad3Flip);
+            addXquad3 = xCor(Quad3Flip(q1i2));
+            addYquad3 = yCor(Quad3Flip(q1i2));
+            quad3Xout = [quad3Xout ; addXquad3];
+            quad3Yout = [quad3Yout ; addYquad3];
+        end
+        
+        quad3Xfinal = quad3Xout;
+        quad3Yfinal = quad3Yout;
+        
+        quadCoords.BR = [quad3Xfinal quad3Yfinal];
+        
+%         h3 = impoly(gca, quad_3);
+        
+        % Quadrant 3 Mask
+%         Quadrants.BR = createMask(h3);
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,3} = quadCoords.BR;
+        % Quadrant 4
+        
+        % Quadrant 4 will be the TOP RIGHT QUADRANT
+        
+        q4_coord1 = [(B{1,1}(rightCoord,2));(B{1,1}(rightCoord,1))];
+        q4_coord2 = [(B{1,1}(topCoord,2));(B{1,1}(topCoord,1))];
+        q4_coord3 = [pixelInfo.Centroid(1) ; pixelInfo.Centroid(2)];
+        
+        quadrant_4_Xcoords = [q4_coord1(1);q4_coord2(1);q4_coord3(1)];
+        quadrant_4_Ycoords = [q4_coord1(2);q4_coord2(2);q4_coord3(2)];
+        
+        q4_test = ((yCor < quadrant_4_Ycoords(1) & yCor < quadrant_4_Ycoords(3)) &...
+            (xCor > quadrant_4_Xcoords(2) & xCor > quadrant_4_Xcoords(3)));
+        
+        Quad4_coord_indices = find(q4_test == 1);
+        Quad4Flip = flipud(Quad4_coord_indices);
+        % Insert found vertices into quadrant coordinates
+        quad4Xtemp = quadrant_4_Xcoords(1);
+        quad4Ytemp = quadrant_4_Ycoords(1);
+        quad4Xout = quad4Xtemp;
+        quad4Yout = quad4Ytemp;
+        for q1i2 = 1:length(Quad4Flip);
+            addXquad4 = xCor(Quad4Flip(q1i2));
+            addYquad4 = yCor(Quad4Flip(q1i2));
+            quad4Xout = [quad4Xout ; addXquad4];
+            quad4Yout = [quad4Yout ; addYquad4];
+        end
+
+        quad4Xfinal = [quad4Xout ; quadrant_4_Xcoords(2:3)];
+        quad4Yfinal = [quad4Yout ; quadrant_4_Ycoords(2:3)];
+        
+        quadCoords.BL = [quad4Xfinal quad4Yfinal];
+        
+%         h4 = impoly(gca, quad_4);
+        
+        % Quadrant 4 Mask
+%         Quadrants.BL = createMask(h4);
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,4} = quadCoords.BL;
+
+        % CALCULATE NUM PIXELS ABOVE THRESHHOLD IN EACH QUADRANT AND DIVIDE
+        % BY TOTAL
+        
+        % injArea(i) AREA of whole polygon that exceeds threshold
+        
+        injImage(~mNtb_mask) = 0; % use inverse of mask to get rid of out poly pixels
+        threshExceedIndex = injImage > pixThresh;
+        % to plot image of injection threshold match
+        injImage(~threshExceedIndex) = 0;
+        
+        injArea(i) = bwarea(threshExceedIndex); % BASELINE 
+        
+        quadInfo = struct;
+        pixelsPerquad = cell(1,3);
+        hold on
+        quadPlotsS = cell(1,3);
+        for sti = 1:4
+            samplequad = roipoly(dim1,dim2,handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,2),...
+                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,1));
+            quad_mask = poly2mask(handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,1),...
+                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,2),dim1,dim2);
+            pixelsPerquad{1,sti} = injImage(quad_mask);
+            [Qi, ~] = bwboundaries(samplequad,'noholes');
+            quadIndices = cell2mat(Qi);
+            quadPlotsS{1,sti} = quadIndices;
+            
+            quadInfo.(strcat('quad',num2str(sti))).quadMask = injImage;
+            quadInfo.(strcat('quad',num2str(sti))).quadMask(~quad_mask) = 0;
+            quadInfo.(strcat('quad',num2str(sti))).threshExceedIndex = quadInfo.(strcat('quad',num2str(sti))).quadMask > pixThresh;
+            quadInfo.(strcat('quad',num2str(sti))).quadMask(quadInfo.(strcat('quad',num2str(sti))).threshExceedIndex) = 0;
+            quadInfo.(strcat('quad',num2str(sti))).quadArea = bwarea(quadInfo.(strcat('quad',num2str(sti))).threshExceedIndex);
+            quadInfo.(strcat('quad',num2str(sti))).quadRatio = quadInfo.(strcat('quad',num2str(sti))).quadArea / injArea(i);
+            
+            plot(quadPlotsS{1,sti}(:,1),quadPlotsS{1,sti}(:,2),'y');
+        end
+        
+        Quadrants{1,i} = quadInfo;
+        
     end
     % To ensure that Standard Deviation does not artifically
     % inflate pixel threshold in excess of 255
@@ -686,21 +1074,15 @@ for i = 1:length(handles.numSections)
         
         
     else
-        modImage = injImage; % save image in new file
-        modImage(~mNtb_mask) = 0; % use inverse of mask to get rid of out poly pixels
-        threshExceedIndex = modImage > pixThresh;
-        % to plot image of injection threshold match
-        modImage(~threshExceedIndex) = 0;
+
         
-        injArea(i) = bwarea(threshExceedIndex);
-        
-        blankImage2 = uint8(zeros(dim1,dim2,3));
-        blankImage2(:,:,1) = modImage;
-        
-        cla(handles.imDisplay)
-        imshow(blankImage2);
+%         blankImage2 = uint8(zeros(dim1,dim2,3));
+%         blankImage2(:,:,1) = modImage;
+%         
+%         cla(handles.imDisplay)
+%         imshow(blankImage2);
         hold on
-        plot(Xcoords{i,1}, Ycoords{i,1},'-y');
+        plot(Xcoords{i,1}, Ycoords{i,1},'-r');
         
         set(handles.infoT,'String','Press enter for next image');
         handles.figActive = 1;
@@ -735,6 +1117,7 @@ for i = 1:length(handles.numSections)
 end
 
 handles.AllDATA.(strcat('sheet',num2str(handles.SheetCount))) = get(handles.dataTable,'Data');
+handles.AllDATA2.(strcat('sheet',num2str(handles.SheetCount))) = Quadrants;
 handles.CaseNames{handles.SheetCount} = caseName;
  	
 set(handles.dataTable,'Data','');
@@ -759,6 +1142,8 @@ cla(handles.imDisplay)
 
 
 
+
+
 guidata(hObject, handles);
 
 % --- Executes on button press in gThresh.
@@ -777,6 +1162,8 @@ set(handles.gThresh,'Enable','off');
 set(handles.sectList,'Enable','off')
 
 guidata(hObject, handles);
+
+
 
 
 function stdT_Callback(hObject, eventdata, handles)
@@ -846,7 +1233,7 @@ exitquest = questdlg('Are you sure you want to RESTART the program?','Restart?',
 switch exitquest
     case 'Yes'
         delete(handles.figure1);
-        DyeDist_dev;
+        DyeDist_dev2;
     case 'No'
         return
 end
@@ -899,6 +1286,37 @@ switch expquest
         
         numofSheets = numel(fieldnames(handles.AllDATA));
         
+        orientCh = questdlg('Sagittal or Coronal sections?','Orientation','Sagittal','Coronal','Sagittal');
+        
+        switch orientCh
+            case 'Sagittal'
+                orientKey = [{'TL';'BL';'BR';'TR'} , {'AD';'AV';'PV';'PD'}];
+            case 'Coronal'
+                orientKey = [{'TL';'BL';'BR';'TR'} , {'LD';'LV';'MV';'MD'}];
+        end
+        
+        % For generic data
+        for nsi = 1:numofSheets
+            
+            tempCols = handles.ExportColnames{nsi};
+            tempSheet = handles.CaseNames{nsi};
+            tempData = handles.AllDATA.(strcat('sheet',num2str(nsi)));
+            
+            % clean up data
+            if isnan(tempData{1,4})
+                tempData = tempData(:,1:3);
+            end
+            
+            if DS_toggle
+                outData = cell2dataset(tempData,'VarNames',tempCols);
+            else
+                % Do something
+            end
+            saveName = char(strcat('ImData_',date,'_',tempSheet,'.xlsx'));
+            export(outData,'XLSfile',saveName)
+        end
+        
+        % For quadrant analysis % ADD EXPORT STUFF
         for nsi = 1:numofSheets
             
             tempCols = handles.ExportColnames{nsi};
