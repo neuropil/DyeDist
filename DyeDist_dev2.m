@@ -272,11 +272,11 @@ function roiButton_Callback(hObject, ~, handles)
 set(handles.roiButton,'Enable','off');
 
 caseName = inputdlg('Input Case Name','Case Name',1,{'Case1'});
-	
+
 if isempty(caseName)
-	    caseName = 'Case1';
+    caseName = 'Case1';
 end
-	
+
 % SET UP TOGGLE FOR BOX AND ALGORITHM
 boxQuestion = 1;
 while boxQuestion
@@ -325,7 +325,7 @@ for i = 1:length(handles.numSections)
     
     set(handles.sectList,'Value',i);
     
-
+    
     
     if isfield(handles.imageINFO,'Image');
         imageToggle = 0;
@@ -359,87 +359,88 @@ for i = 1:length(handles.numSections)
         injImage = imageMatrix(:,:,handles.colorId(2));
         
     end
-
+    
     % Trace Image
     
     cla(handles.imDisplay)
+    axes(handles.imDisplay)
     imshow(traceImage);
     
     set(handles.infoT,'String','Trace Region of Interest');
-    [~, Xcoords{i,1}, Ycoords{i,1}] = roipoly(traceImage);    
+    [~, Xcoords{i,1}, Ycoords{i,1}] = roipoly(traceImage);
     polyArea(i) = polyarea(Xcoords{i,1},Ycoords{i,1});
     
     % Create NTS mask
     mNtb_mask = poly2mask(Xcoords{i,1},Ycoords{i,1},dim1,dim2);
-
+    
     if boxToggle % FIND END
-	        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	        % Get sample boxes
-	        
-	        totPixels = dim1*dim2;
-	        onePercent = totPixels*0.005;
-	        boxDim = round(sqrt(onePercent));
-	        halfBD = round(boxDim/2);
-	        
-	        cla(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
-	        %     axes(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
-	        imshow(injThreshImage); % REPEAT THIS LINE OUTSIDE TOGGLE
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Get sample boxes
         
-	        set(handles.infoT,'String','Click three times on Image');
-	        [x_coord, y_coord] = ginput(3);
-	        set(handles.infoT,'String',[]);
-	        x_coord = round(x_coord);
-	        y_coord = round(y_coord);
-	        
-	        sYcoords = cell(1,3);
-	        sXcoords = cell(1,3);
-	        for si = 1:length(x_coord)
-	            sXcoords{1,si} = round([x_coord(si) - halfBD , x_coord(si) + halfBD, x_coord(si) + halfBD, x_coord(si) - halfBD]);
-	            sYcoords{1,si} = round([y_coord(si) - halfBD , y_coord(si) - halfBD, y_coord(si) + halfBD, y_coord(si) + halfBD]);
-	        end
-	        
-	        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-	        % Extract data and plot boxes
-	        
-	        pixelsPerbox = cell(1,3);
-	        hold on
-	        boxPlotsS = cell(1,3);
-	        for sti = 1:3
-	            samplebox = roipoly(dim1,dim2,sYcoords{1,sti},sXcoords{1,sti});
-	            square_mask = poly2mask(sXcoords{1,sti},sYcoords{1,sti},dim1,dim2);
-	            pixelsPerbox{1,sti} = injThreshImage(square_mask);
-	            [Bi, ~] = bwboundaries(samplebox,'noholes');
-	            boxIndices = cell2mat(Bi);
-	            boxPlotsS{1,sti} = boxIndices;
-	        end
-	        
-	        % calculate threshold
-	        num_inj_pixels = injImage(mNtb_mask);
-	        convertPixels2double = single(num_inj_pixels);
-	        
-	        handles.pixelsBackground = double([pixelsPerbox{1,1};pixelsPerbox{1,2};pixelsPerbox{1,3};convertPixels2double]);
-	        
-	        handles.pMean = round(mean(handles.pixelsBackground));
-            handles.pStd = round(std(handles.pixelsBackground));
+        totPixels = dim1*dim2;
+        onePercent = totPixels*0.005;
+        boxDim = round(sqrt(onePercent));
+        halfBD = round(boxDim/2);
+        
+        cla(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
+        %     axes(handles.imDisplay); % REPEAT THIS LINE OUTSIDE TOGGLE
+        imshow(injThreshImage); % REPEAT THIS LINE OUTSIDE TOGGLE
+        
+        set(handles.infoT,'String','Click three times on Image');
+        [x_coord, y_coord] = ginput(3);
+        set(handles.infoT,'String',[]);
+        x_coord = round(x_coord);
+        y_coord = round(y_coord);
+        
+        sYcoords = cell(1,3);
+        sXcoords = cell(1,3);
+        for si = 1:length(x_coord)
+            sXcoords{1,si} = round([x_coord(si) - halfBD , x_coord(si) + halfBD, x_coord(si) + halfBD, x_coord(si) - halfBD]);
+            sYcoords{1,si} = round([y_coord(si) - halfBD , y_coord(si) - halfBD, y_coord(si) + halfBD, y_coord(si) + halfBD]);
+        end
+        
+        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+        % Extract data and plot boxes
+        
+        pixelsPerbox = cell(1,3);
+        hold on
+        boxPlotsS = cell(1,3);
+        for sti = 1:3
+            samplebox = roipoly(dim1,dim2,sYcoords{1,sti},sXcoords{1,sti});
+            square_mask = poly2mask(sXcoords{1,sti},sYcoords{1,sti},dim1,dim2);
+            pixelsPerbox{1,sti} = injThreshImage(square_mask);
+            [Bi, ~] = bwboundaries(samplebox,'noholes');
+            boxIndices = cell2mat(Bi);
+            boxPlotsS{1,sti} = boxIndices;
+        end
+        
+        % calculate threshold
+        num_inj_pixels = injImage(mNtb_mask);
+        convertPixels2double = single(num_inj_pixels);
+        
+        handles.pixelsBackground = double([pixelsPerbox{1,1};pixelsPerbox{1,2};pixelsPerbox{1,3};convertPixels2double]);
+        
+        handles.pMean = round(mean(handles.pixelsBackground));
+        handles.pStd = round(std(handles.pixelsBackground));
+        
+        pixThresh = handles.pMean + (str2double(get(handles.stdT,'String'))*handles.pStd);
+        
+        % To ensure that Standard Deviation does not artifically
+        % inflate pixel threshold in excess of 255
+        if pixThresh >= 255
+            pixThresh = pixThresh - (2*handles.pStd);
             
-            pixThresh = handles.pMean + (str2double(get(handles.stdT,'String'))*handles.pStd);
-            
-            % To ensure that Standard Deviation does not artifically
-            % inflate pixel threshold in excess of 255
-            if pixThresh >= 255
-                pixThresh = pixThresh - (2*handles.pStd);
-                
-                % Double check of pixel threshold 2/23/2014
-                while pixThresh >= 255
-                    pixThresh = pixThresh - (handles.pStd/2);
-                end
-                
+            % Double check of pixel threshold 2/23/2014
+            while pixThresh >= 255
+                pixThresh = pixThresh - (handles.pStd/2);
             end
             
+        end
+        
     else
-        cla(handles.imDisplay); 
-        imshow(injThreshImage); 
-
+        cla(handles.imDisplay);
+        imshow(injThreshImage);
+        
         % calculate threshold
         num_inj_pixels = injImage(mNtb_mask);
         convertPixels2double = single(num_inj_pixels);
@@ -457,7 +458,7 @@ for i = 1:length(handles.numSections)
         % to plot image of injection threshold match
         modImage(~threshExceedIndex) = 0;
         
-        injArea(i) = bwarea(threshExceedIndex); % BASELINE 
+        injArea(i) = bwarea(threshExceedIndex); % BASELINE
         
         % CREATE BISECTED POLYGON FUNCTION
         
@@ -512,10 +513,18 @@ for i = 1:length(handles.numSections)
                 
             elseif sum(topLeft) > 1 % too liberal
                 while sum(topLeft) ~= 1
+                    
                     yratio = yratio - 0.001;
+                    if yratio < 0
+                        yratio = 0.5;
+                    end
                     yval = ymax*yratio;
                     xratio = xratio - 0.001;
-                    xval = ymax*xratio;
+                    if xratio < 0
+                        xratio = 0.5;
+                    end
+                    xval = xmax*xratio;
+                    
                     if sum(yCor < yval) == 0
                         topLeft = (yCor == min(yCor) & xCor < xval);
                     elseif sum(xCor < xval) == 0
@@ -569,18 +578,31 @@ for i = 1:length(handles.numSections)
         yratio = 0.5;
         xratio = 0.5;
         
+        brCount = 1;
         if sum(botRight) ~= 1
             if sum(botRight) == 0
                 while sum(botRight) ~= 1 % too conservative
-                    yratio = yratio - 0.01;
-                    xratio = xratio - 0.01;
+                    yratio = yratio - 0.001;
+                    xratio = xratio - 0.001;
                     botRight = (yCor > ymax*yratio & xCor > xmax*xratio);
+                    brCount = brCount + 1;
+                    if brCount > 1000;
+                        warndlg('bottom right is an infinite loop')
+                        break
+                    end
                 end
             elseif sum(botRight) > 1
                 while sum(botRight) ~= 1 % too liberal
-                    yratio = yratio + 0.01;
-                    xratio = xratio + 0.01;
+                    yratio = yratio + 0.0001;
                     botRight = (yCor > ymax*yratio & xCor > xmax*xratio);
+                    
+                    botRight = xCor == max(xCor(botRight)) & yCor > ymax*yratio;
+                    
+                    brCount = brCount + 1;
+                    if brCount > 1000;
+                        warndlg('bottom right is an infinite loop')
+                        break
+                    end
                 end
             end
         end
@@ -590,6 +612,7 @@ for i = 1:length(handles.numSections)
         yratio = 0.5;
         xratio = 0.5;
         
+        trCount = 1;
         if sum(topRight) ~= 1
             if sum(topRight) == 0
                 
@@ -600,30 +623,48 @@ for i = 1:length(handles.numSections)
                     while sum(topRight) ~= 1 % too conservative
                         maxNow = maxSortx(1:tri);
                         xVals = ismember(xCor, maxNow);
-                        yratio = yratio + 0.01;
+                        yratio = yratio + 0.001;
                         topRight = (xVals & yCor < ymax*yratio);
                         tri = 1 + 1;
+                        
+                        if trCount > 1000;
+                            warndlg('bottom right is an infinite loop')
+                            break
+                        end
+                        
                     end
                     
                 else
                     
                     while sum(topRight) ~= 1 % too conservative
-                        yratio = yratio + 0.01;
-                        xratio = xratio - 0.01;
+                        yratio = yratio + 0.001;
+                        xratio = xratio - 0.001;
                         topRight = (yCor < ymax*yratio & xCor > xmax*xratio);
+                        
+                        if trCount > 1000;
+                            warndlg('bottom right is an infinite loop')
+                            break
+                        end
+                        
                     end
                     
                 end
             elseif sum(topRight) > 1
-
+                
                 while sum(topRight) ~= 1 % too liberal
                     yratio = yratio - 0.001;
                     xratio = xratio + 0.001;
                     topRight = (yCor < ymax*yratio & xCor > xmax*xratio);
+                    
+                    if trCount > 1000;
+                        warndlg('bottom right is an infinite loop')
+                        break
+                    end
+                    
                 end
             end
         end
-       
+        
         
         % Top Coordinate
         topMidDist = (xCor(topRight) + xCor(topLeft))/2;
@@ -639,33 +680,32 @@ for i = 1:length(handles.numSections)
         
         % Right Coordinate
         rightMidDist = (yCor(topRight) + yCor(botRight))/2;
-        rightCoord = max(find(B{1,1}(:,1) == ceil(rightMidDist) & B{1,1}(:,2) > xmax*0.6));
+        rightCoord = max(find(B{1,1}(:,1) == floor(rightMidDist) & B{1,1}(:,2) > xmax*0.6));
         
         % Quadrant 1
         
         % Quadrant 1 will be the TOP LEFT QUADRANT
         
         % Set the three anchor vertices (centriod, top , left)
-        q1_coord1 = [pixelInfo.Centroid(1) ; pixelInfo.Centroid(2)];
-        q1_coord2 = [(B{1,1}(leftCoord,2));(B{1,1}(leftCoord,1))];
-        q1_coord3 = [(B{1,1}(topCoord,2));(B{1,1}(topCoord,1))];
+        q1_coord1 = [(B{1,1}(topCoord,2));(B{1,1}(topCoord,1))];
+        q1_coord2 = [pixelInfo.Centroid(1) ; pixelInfo.Centroid(2)];
+        q1_coord3 = [(B{1,1}(leftCoord,2));(B{1,1}(leftCoord,1))];
         
         % Create X and Y coordinates out of vertices
         quadrant_1_Xcoords = [q1_coord1(1);q1_coord2(1);q1_coord3(1)];
         quadrant_1_Ycoords = [q1_coord1(2);q1_coord2(2);q1_coord3(2)];
         
-        q1_test = ((yCor < quadrant_1_Ycoords(1) & yCor < quadrant_1_Ycoords(2)) &...
-            (xCor < quadrant_1_Xcoords(1) & xCor < quadrant_1_Xcoords(3)));
+        q1_test = ((yCor < quadrant_1_Ycoords(2) & yCor < quadrant_1_Ycoords(3)) &...
+            (xCor < quadrant_1_Xcoords(1) & xCor < quadrant_1_Xcoords(2)));
         
         % Get indices for found coordinates
         Quad1_coord_indices = find(q1_test == 1);
         Quad1Flip = flipud(Quad1_coord_indices);
         
         % Insert found vertices into quadrant coordinates
-        quad1Xtemp = quadrant_1_Xcoords(1:2);
-        quad1Ytemp = quadrant_1_Ycoords(1:2);
-        quad1Xout = quad1Xtemp;
-        quad1Yout = quad1Ytemp;
+        
+        quad1Xout = quadrant_1_Xcoords;
+        quad1Yout = quadrant_1_Ycoords;
         for q1i2 = 1:length(Quad1Flip);
             addXquad1 = xCor(Quad1Flip(q1i2));
             addYquad1 = yCor(Quad1Flip(q1i2));
@@ -673,16 +713,18 @@ for i = 1:length(handles.numSections)
             quad1Yout = [quad1Yout ; addYquad1];
         end
         
-        quad1Xfinal = [quad1Xout ; quadrant_1_Xcoords(3)];
-        quad1Yfinal = [quad1Yout ; quadrant_1_Ycoords(3)];
+        quad1Xfinal = [quad1Xout ; quad1Xout(1)];
+        quad1Yfinal = [quad1Yout ; quad1Yout(1)];
+        
+        orderIndex.TL = convhull(quad1Xfinal,quad1Yfinal);
         
         quadCoords.TL = [quad1Xfinal quad1Yfinal];
         
-        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,1} = quadCoords.TL;
-%         h = impoly(injImage, quad_1);
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,1} = quadCoords.TL;
+        %         h = impoly(injImage, quad_1);
         
         % Quadrant 1 Mask
-%         Quadrants.TL = createMask(h);
+        %         Quadrants.TL = createMask(h);
         
         % Quadrant 2
         
@@ -715,15 +757,17 @@ for i = 1:length(handles.numSections)
         quad2Xfinal = [quad2Xout ; quadrant_2_Xcoords(3)];
         quad2Yfinal = [quad2Yout ; quadrant_2_Ycoords(3)];
         
+        orderIndex.BL = convhull(quad2Xfinal,quad2Yfinal);
+        
         quadCoords.BL = [quad2Xfinal quad2Yfinal];
         
         % Create polygon handles for quadrant 2
         
-%         h2 = impoly(gca, quad_2);
+        %         h2 = impoly(gca, quad_2);
         
         % Quadrant 2 Mask
-%         Quadrants.BL = createMask(h2);
-        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,2} = quadCoords.BL;
+        %         Quadrants.BL = createMask(h2);
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,2} = quadCoords.BL;
         
         % Quadrant 3
         
@@ -756,13 +800,15 @@ for i = 1:length(handles.numSections)
         quad3Xfinal = quad3Xout;
         quad3Yfinal = quad3Yout;
         
+        orderIndex.BR = convhull(quad3Xfinal,quad3Yfinal);
+        
         quadCoords.BR = [quad3Xfinal quad3Yfinal];
         
-%         h3 = impoly(gca, quad_3);
+        %         h3 = impoly(gca, quad_3);
         
         % Quadrant 3 Mask
-%         Quadrants.BR = createMask(h3);
-        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,3} = quadCoords.BR;
+        %         Quadrants.BR = createMask(h3);
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,3} = quadCoords.BR;
         % Quadrant 4
         
         % Quadrant 4 will be the TOP RIGHT QUADRANT
@@ -790,18 +836,20 @@ for i = 1:length(handles.numSections)
             quad4Xout = [quad4Xout ; addXquad4];
             quad4Yout = [quad4Yout ; addYquad4];
         end
-
-        quad4Xfinal = [quad4Xout ; quadrant_4_Xcoords(2:3)];
-        quad4Yfinal = [quad4Yout ; quadrant_4_Ycoords(2:3)];
         
-        quadCoords.BL = [quad4Xfinal quad4Yfinal];
+        quad4Xfinal = [quad4Xout ; quadrant_4_Xcoords(2:3) ; quad4Xout(1)];
+        quad4Yfinal = [quad4Yout ; quadrant_4_Ycoords(2:3) ; quad4Yout(1)];
         
-%         h4 = impoly(gca, quad_4);
+        orderIndex.TR = convhull(quad4Xfinal,quad4Yfinal);
+        
+        quadCoords.TR = [quad4Xfinal quad4Yfinal];
+        
+        %         h4 = impoly(gca, quad_4);
         
         % Quadrant 4 Mask
-%         Quadrants.BL = createMask(h4);
-        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,4} = quadCoords.BL;
-
+        %         Quadrants.BL = createMask(h4);
+        handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,4} = quadCoords.TR;
+        
         % CALCULATE NUM PIXELS ABOVE THRESHHOLD IN EACH QUADRANT AND DIVIDE
         % BY TOTAL
         
@@ -812,28 +860,33 @@ for i = 1:length(handles.numSections)
         % to plot image of injection threshold match
         injImage(~threshExceedIndex) = 0;
         
-        injArea(i) = bwarea(threshExceedIndex); % BASELINE 
+        injArea(i) = bwarea(threshExceedIndex); % BASELINE
         
         quadInfo = struct;
         pixelsPerquad = cell(1,3);
         hold on
         quadPlotsS = cell(1,3);
+        
+        quadKey = {'TL';'BL';'BR';'TR'};
+        
         for sti = 1:4
-            samplequad = roipoly(dim1,dim2,handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,2),...
-                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,1));
-            quad_mask = poly2mask(handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,1),...
-                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))){1,sti}(:,2),dim1,dim2);
+            samplequad = roipoly(dim2,dim1,...
+                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),2),...
+                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),1));
+            quad_mask = poly2mask(handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),1),...
+                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),2),...
+                dim2,dim1);
             pixelsPerquad{1,sti} = injImage(quad_mask);
             [Qi, ~] = bwboundaries(samplequad,'noholes');
             quadIndices = cell2mat(Qi);
             quadPlotsS{1,sti} = quadIndices;
             
-            quadInfo.(strcat('quad',num2str(sti))).quadMask = injImage;
-            quadInfo.(strcat('quad',num2str(sti))).quadMask(~quad_mask) = 0;
-            quadInfo.(strcat('quad',num2str(sti))).threshExceedIndex = quadInfo.(strcat('quad',num2str(sti))).quadMask > pixThresh;
-            quadInfo.(strcat('quad',num2str(sti))).quadMask(quadInfo.(strcat('quad',num2str(sti))).threshExceedIndex) = 0;
-            quadInfo.(strcat('quad',num2str(sti))).quadArea = bwarea(quadInfo.(strcat('quad',num2str(sti))).threshExceedIndex);
-            quadInfo.(strcat('quad',num2str(sti))).quadRatio = quadInfo.(strcat('quad',num2str(sti))).quadArea / injArea(i);
+            quadInfo.(quadKey{sti}).quadMask = injImage;
+            quadInfo.(quadKey{sti}).quadMask(~quad_mask) = 0;
+            quadInfo.(quadKey{sti}).threshExceedIndex = quadInfo.(quadKey{sti}).quadMask > pixThresh;
+            quadInfo.(quadKey{sti}).quadMask(quadInfo.(quadKey{sti}).threshExceedIndex) = 0;
+            quadInfo.(quadKey{sti}).quadArea = bwarea(quadInfo.(quadKey{sti}).threshExceedIndex);
+            quadInfo.(quadKey{sti}).quadRatio = quadInfo.(quadKey{sti}).quadArea / injArea(i);
             
             plot(quadPlotsS{1,sti}(:,1),quadPlotsS{1,sti}(:,2),'y');
         end
@@ -864,7 +917,7 @@ for i = 1:length(handles.numSections)
     set(handles.meanT,'String',num2str(handles.pMean));
     set(handles.sdT,'String',num2str(handles.pStd));
     set(handles.thresT,'String',num2str(pixThresh));
-        
+    
     if boxToggle
         % Get box outside polygon
         maxPpoint = min(Ycoords{i,1});
@@ -988,7 +1041,7 @@ for i = 1:length(handles.numSections)
                     
             end
         end
-
+        
         if newbox
             nBoxXc = zeros(1,4);
             nBoxYc = zeros(1,4);
@@ -1059,7 +1112,7 @@ for i = 1:length(handles.numSections)
         pause
         
         set(handles.infoT,'String',[]);
-
+        
         % Area of polygon
         dataTOout.polyArea(i,1) = round(polyArea(i));
         % Area of injection in polygon
@@ -1074,13 +1127,13 @@ for i = 1:length(handles.numSections)
         
         
     else
-
         
-%         blankImage2 = uint8(zeros(dim1,dim2,3));
-%         blankImage2(:,:,1) = modImage;
-%         
-%         cla(handles.imDisplay)
-%         imshow(blankImage2);
+        
+        %         blankImage2 = uint8(zeros(dim1,dim2,3));
+        %         blankImage2(:,:,1) = modImage;
+        %
+        %         cla(handles.imDisplay)
+        %         imshow(blankImage2);
         hold on
         plot(Xcoords{i,1}, Ycoords{i,1},'-r');
         
@@ -1119,12 +1172,13 @@ end
 handles.AllDATA.(strcat('sheet',num2str(handles.SheetCount))) = get(handles.dataTable,'Data');
 handles.AllDATA2.(strcat('sheet',num2str(handles.SheetCount))) = Quadrants;
 handles.CaseNames{handles.SheetCount} = caseName;
- 	
+handles.CaseFnames{handles.SheetCount} = handles.ImgNames;
+
 set(handles.dataTable,'Data','');
 handles.SheetCount = handles.SheetCount + 1;
 % DETERMINE IF USER WANTS TO ANALYZE ANOTHER DATA SET
 msgbox('To Start another image set select LOAD FOLDER', 'INFO','help');
- 	
+
 cla(handles.imDisplay)
 % if handles.hemiCount == 1;
 %     cla(handles.imDisplay)
@@ -1137,7 +1191,7 @@ cla(handles.imDisplay)
 %     set(handles.hemiPanel,'Visible','off')
 %     set(handles.fileOpts,'Enable','on');
 %     set(handles.expXl,'Enable','on');
-%     
+%
 % end
 
 
@@ -1290,9 +1344,9 @@ switch expquest
         
         switch orientCh
             case 'Sagittal'
-                orientKey = [{'TL';'BL';'BR';'TR'} , {'AD';'AV';'PV';'PD'}];
+                orientKey = {'AD';'AV';'PV';'PD'};
             case 'Coronal'
-                orientKey = [{'TL';'BL';'BR';'TR'} , {'LD';'LV';'MV';'MD'}];
+                orientKey = {'LD';'LV';'MV';'MD'};
         end
         
         % For generic data
@@ -1317,24 +1371,36 @@ switch expquest
         end
         
         % For quadrant analysis % ADD EXPORT STUFF
+        quadKey = {'TL';'BL';'BR';'TR'};
         for nsi = 1:numofSheets
             
-            tempCols = handles.ExportColnames{nsi};
+            fileNames = handles.CaseFnames{nsi}; % NOT RELATED TO CASE
+            
+            tempCols = {'SectionID','QuadID','AreaRatio'};
             tempSheet = handles.CaseNames{nsi};
-            tempData = handles.AllDATA.(strcat('sheet',num2str(nsi)));
+            numSections = length(handles.AllDATA2.(strcat('sheet',num2str(nsi))));
             
-            % clean up data
-            if isnan(tempData{1,4})
-                tempData = tempData(:,1:3);
+            sectCount = 1;
+            
+            tempSect = cell(4*numSections,1);
+            tempQuad = cell(4*numSections,1);
+            tempVal = cell(4*numSections,1);
+            for sci = 1:numSections
+                
+                tempData = handles.AllDATA2.(strcat('sheet',num2str(nsi))){sci};
+                
+                for qi = 1:4
+                    tempSect{sectCount,1} = fileNames{sci};
+                    tempQuad{sectCount,1} = orientKey{qi};
+                    tempVal{sectCount,1} = tempData.(quadKey{qi}).quadRatio;
+                    sectCount = sectCount + 1;
+                end
             end
             
-            if DS_toggle
-                outData = cell2dataset(tempData,'VarNames',tempCols);
-            else
-                % Do something
-            end
+            quadOutData = dataset(tempSect,tempQuad,tempVal,'VarNames',tempCols);
+            
             saveName = char(strcat('ImData_',date,'_',tempSheet,'.xlsx'));
-            export(outData,'XLSfile',saveName)
+            export(quadOutData,'XLSfile',saveName)
         end
         
     case 'No'
@@ -1363,6 +1429,7 @@ switch expquest
         cd(handles.saveLoc)
         
         numofSheets = numel(fieldnames(handles.AllDATA));
+        
         OutData = struct;
         for nsi = 1:numofSheets
             
@@ -1419,16 +1486,58 @@ switch expquest
             if isnan(tempData{1,4})
                 tempData = tempData(:,1:3);
             end
-
+            
             tempCols = ['Cases' , 'Sections' , tempCols];
             tempData = [num2cell(tempCases) , num2cell(tempSections) , tempData];
             
             tempDS = cell2dataset(tempData,'VarNames',tempCols);
             outDS = [outDS ; tempDS];
-
-        end        
-            saveName = char(strcat('ImDataDS_',date,'.mat'));
-            save(saveName,'outDS');
+            
+        end
+        saveName = char(strcat('ImDataPolyDS_',date,'.mat'));
+        save(saveName,'outDS');
+        
+        orientCh = questdlg('Sagittal or Coronal sections?','Orientation','Sagittal','Coronal','Sagittal');
+        
+        switch orientCh
+            case 'Sagittal'
+                orientKey = {'AD';'AV';'PV';'PD'};
+            case 'Coronal'
+                orientKey = {'LD';'LV';'MV';'MD'};
+        end
+        
+        %%% Quad analysis
+        quadKey = {'TL';'BL';'BR';'TR'};
+        for nsi = 1:numofSheets
+            
+            fileNames = handles.CaseFnames{nsi}; % NOT RELATED TO CASE
+            
+            tempCols = {'SectionID','QuadID','AreaRatio'};
+            tempSheet = handles.CaseNames{nsi};
+            numSections = length(handles.AllDATA2.(strcat('sheet',num2str(nsi))));
+            
+            sectCount = 1;
+            
+            tempSect = cell(4*numSections,1);
+            tempQuad = cell(4*numSections,1);
+            tempVal = cell(4*numSections,1);
+            for sci = 1:numSections
+                
+                tempData = handles.AllDATA2.(strcat('sheet',num2str(nsi))){sci};
+                
+                for qi = 1:4
+                    tempSect{sectCount,1} = fileNames{sci};
+                    tempQuad{sectCount,1} = orientKey{qi};
+                    tempVal{sectCount,1} = tempData.(quadKey{qi}).quadRatio;
+                    sectCount = sectCount + 1;
+                end
+            end
+            
+            quadOutData = dataset(tempSect,tempQuad,tempVal,'VarNames',tempCols);
+            
+            saveName = strcat('ImQuadData_',date,'_',tempSheet,'.mat');
+            save(char(saveName),'quadOutData')
+        end
         
     case 'No'
         return
