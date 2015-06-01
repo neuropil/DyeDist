@@ -29,7 +29,8 @@ function varargout = DyeDist_dev2(varargin)
 
 
 % THINGS TO DO
-% ADD NEW DISTRIBUTION ANALYSIS by quadrant (3/6/2014)
+% FIX algorthims to detect corners
+% Fix BR vertex find
 
 
 
@@ -514,12 +515,12 @@ for i = 1:length(handles.numSections)
             elseif sum(topLeft) > 1 % too liberal
                 while sum(topLeft) ~= 1
                     
-                    yratio = yratio - 0.001;
+                    yratio = yratio - 0.0001;
                     if yratio < 0
                         yratio = 0.5;
                     end
                     yval = ymax*yratio;
-                    xratio = xratio - 0.001;
+                    xratio = xratio - 0.0001;
                     if xratio < 0
                         xratio = 0.5;
                     end
@@ -627,6 +628,7 @@ for i = 1:length(handles.numSections)
                         topRight = (xVals & yCor < ymax*yratio);
                         tri = 1 + 1;
                         
+                        trCount = trCount + 1;
                         if trCount > 1000;
                             warndlg('bottom right is an infinite loop')
                             break
@@ -641,6 +643,7 @@ for i = 1:length(handles.numSections)
                         xratio = xratio - 0.001;
                         topRight = (yCor < ymax*yratio & xCor > xmax*xratio);
                         
+                        trCount = trCount + 1;
                         if trCount > 1000;
                             warndlg('bottom right is an infinite loop')
                             break
@@ -656,6 +659,7 @@ for i = 1:length(handles.numSections)
                     xratio = xratio + 0.001;
                     topRight = (yCor < ymax*yratio & xCor > xmax*xratio);
                     
+                    trCount = trCount + 1;
                     if trCount > 1000;
                         warndlg('bottom right is an infinite loop')
                         break
@@ -873,8 +877,8 @@ for i = 1:length(handles.numSections)
             samplequad = roipoly(dim2,dim1,...
                 handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),2),...
                 handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),1));
-            quad_mask = poly2mask(handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),1),...
-                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),2),...
+            quad_mask = poly2mask(handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),2),...
+                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),1),...
                 dim2,dim1);
             pixelsPerquad{1,sti} = injImage(quad_mask);
             [Qi, ~] = bwboundaries(samplequad,'noholes');
@@ -886,7 +890,13 @@ for i = 1:length(handles.numSections)
             quadInfo.(quadKey{sti}).threshExceedIndex = quadInfo.(quadKey{sti}).quadMask > pixThresh;
             quadInfo.(quadKey{sti}).quadMask(quadInfo.(quadKey{sti}).threshExceedIndex) = 0;
             quadInfo.(quadKey{sti}).quadArea = bwarea(quadInfo.(quadKey{sti}).threshExceedIndex);
-            quadInfo.(quadKey{sti}).quadRatio = quadInfo.(quadKey{sti}).quadArea / injArea(i);
+            
+            quadInfo.(quadKey{sti}).wholequadArea = polyarea(handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),2),...
+                handles.quadInfo.(strcat('sheet',num2str(handles.SheetCount))).(strcat('section',num2str(i))){1,sti}(orderIndex.(quadKey{sti}),1));
+
+            
+            
+            quadInfo.(quadKey{sti}).quadRatio = quadInfo.(quadKey{sti}).quadArea / quadInfo.(quadKey{sti}).wholequadArea;
             
             plot(quadPlotsS{1,sti}(:,1),quadPlotsS{1,sti}(:,2),'y');
         end
